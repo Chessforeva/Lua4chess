@@ -1,0 +1,2 @@
+luajit sargon.lua
+pause

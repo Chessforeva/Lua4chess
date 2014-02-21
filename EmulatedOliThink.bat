@@ -1,0 +1,2 @@
+luajit OliThinkChess.lua
+pause

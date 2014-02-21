@@ -1,0 +1,2 @@
+luajit LuaJester.lua
+pause

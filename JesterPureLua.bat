@@ -1,0 +1,2 @@
+luajit JesterPureLua.lua
+pause

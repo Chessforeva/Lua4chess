@@ -1,0 +1,2 @@
+luajit garbochess.lua
+pause
