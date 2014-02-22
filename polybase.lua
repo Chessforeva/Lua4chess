@@ -563,6 +563,8 @@ function getMove(i)
  if(p>1) then
 	uci = uci + string.sub("nbrq", p+1,p+1);
  end
+ --for castling moves polyglot base holds e1h1(e1g1), e1a1(e1c1), e8h8(e8g8), e8a8(e8c8)
+
  return uci;
 end
 
