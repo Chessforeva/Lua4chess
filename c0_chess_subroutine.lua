@@ -21,7 +21,6 @@ c0_LuaChess.c0_position = ""
 c0_LuaChess.c0_side =1
 c0_LuaChess.c0_sidemoves = 1
 c0_LuaChess.c0_moving = false
-c0_LuaChess.c0_waitmove = false
 
 c0_LuaChess.c0_wKingmoved = false
 c0_LuaChess.c0_bKingmoved = false
@@ -95,7 +94,6 @@ function c0_LuaChess.a_SAMPLES ( )
 
 
 	c0_LuaChess.c0_side =1					-- This side is white.   For black set -1
-	c0_LuaChess.c0_waitmove = true				-- Waiting for mouse drag...
 	c0_LuaChess.c0_set_start_position("")		    -- Set the initial position...
 
     -- 1. Test for basic chess functions (ok)
@@ -190,7 +188,7 @@ function c0_LuaChess.a_SAMPLES ( )
     -- Write Your plugins/c++ chess/connect to UCI chess engines.
     -- It's just a demo.
     c0_LuaChess.c0_Simple_search(1)
-    c0_LuaChess.printout ( "Search deep 1: " .. c0_LuaChess.c0_bestmove )
+    c0_LuaChess.printout ( "Search depth 1: " .. c0_LuaChess.c0_bestmove )
 
     c0_LuaChess.printout ( "Chess openings (first move)" )
     c0_LuaChess.printout ( c0_LuaChess.c0_Opening ("") )
@@ -214,7 +212,6 @@ c0_LuaChess.c0_position = ""
 c0_LuaChess.c0_side =1
 c0_LuaChess.c0_sidemoves = 1
 c0_LuaChess.c0_moving = false
-c0_LuaChess.c0_waitmove = false
 
 c0_LuaChess.c0_wKingmoved = false
 c0_LuaChess.c0_bKingmoved = false
