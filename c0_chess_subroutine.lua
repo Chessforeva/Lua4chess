@@ -2177,6 +2177,11 @@ end
 local c07_gaj=0
 local c07_col="b"
 c0_i7=0
+if( c0_LuaChess.c0_sidemoves<0 ) then 
+    c07_col="w"
+    c07_gaj=c07_gaj+1
+end
+
 while(c0_i7< string.len(c0_moves_str)) do
 
 if(c07_col=="w") then
@@ -2200,8 +2205,10 @@ end
     if( c07_col=="w" ) then
         c0_PGN_ret = c0_PGN_ret .. c0_LuaChess.ToString(c07_gaj) .. ". "
     end
-	c0_PGN_ret = c0_PGN_ret .. c0_move9 .. " "
-
+    if( c07_col=="b" and c0_i7<8) then
+	c0_PGN_ret = c0_PGN_ret .. c0_LuaChess.ToString(c07_gaj) .. "... "
+    end
+    c0_PGN_ret = c0_PGN_ret .. c0_move9 .. " "
  else
     c0_LuaChess.c0_errflag = true
     break
