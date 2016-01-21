@@ -1717,7 +1717,7 @@ local c0_1save_moveslist= c0_LuaChess.c0_moveslist
 
 if( string.len(c0_LuaChess.c0_start_FEN)>0 ) then
     str= ( "{[FEN " .. c0_LuaChess.c0_start_FEN .. "]} " ) .. str
-    if(c0_LuaChess.c0_sidemoves<0) then
+    if(c0_LuaChess.IndexOf(c0_LuaChess.c0_start_FEN," b ")>0) then
         color7="b"
     end
 else
@@ -1933,9 +1933,12 @@ while(i<string.len(str)) do
 			break
 		end
 		if( c0_LuaChess.Substr(str,j,3)=="..." ) then
-            i=j+3
-            break
-        end
+			i=j+3
+			if( c0_LuaChess.Substr(str,i,1)~=" " ) then
+				str=c0_LuaChess.Substr(str,0,i).." "..c0_LuaChess.SubstrAll(str,i);
+			end
+			break
+		end
         j=j+1
 	end
 
