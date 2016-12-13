@@ -2257,7 +2257,7 @@ end
                 end
               end
 
-              b1 = i64_and( RMOVE1(7) , g_BITi[1+5] );
+              b1 = i64_and( RMOVE1(0) , g_BITi[1+3] );
               if ((bit.band(g_flags, 256) ~= 0)  and  (f == 0)  and i64_ne( b1, g_0 )) then
                 if (not DUALATT(3, 2, c)) then
                   registerMoves(PREMOVE(4, g_KING, c), g_0, g_BITi[1+2], ml, mn);
