@@ -2323,6 +2323,7 @@ end
 
         local ret = 0;
         local t = 0;
+	local p = 0;
         local f = g_kingpos[1+c]
         local cb = g_colorb[1+c];
         local c1=bit.bxor(c,1);
