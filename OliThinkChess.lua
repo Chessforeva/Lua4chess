@@ -1,183 +1,34 @@
+--=====================================
+-- It is not a usable Lua Chess engine!
+--=====================================
+-- This "porting fun" is based on OliThink.
+-- Very experimental lua mix, emulated, slow, do not use for projects!
+-- It's for fun only.
+-- Able to checkmate by the way :)
+-- Nothing more.
 --
--- OliThink5 Java(c) Oliver Brausch 28.Jan.2010, ob112@web.de, http://home.arcor.de/dreamlike
--- Lua port by http://chessforeva.blogspot.com
--- Very experimental, emualated, slow, but working on Lua 5.1
---
--- More:
 -- Requires library for bitwise operations http://bitop.luajit.org/
 -- Emulates 64bit numbers
--- Generates rays_mem.txt on first run with precalculated numbers
+-- Generates rays_mem.txt on first run with pre-calculated numbers
 --   (some kind of memory saving for faster performance)
 --
--- LuaJIT fastest version to downlo
+-- LuaJIT
 
 require "bit"
 
-
--- Bitwise functions for emulated 64-bit support. Slow.
-
-
-function i64(v)
- local o = {}; o.l = v; o.h = 0; return o;
-end -- constructor +assign 32-bit value
-
-function i64_ax(h,l)
- local o = {}; o.l = l; o.h = h; return o;
-end -- +assign 64-bit v.as 2 regs
-
-function i64u(x)
- return bit.band( ( bit.lshift(bit.rshift(x,1),1) + bit.band(x,1) ), 0xFFFFFFFF);
-end -- keeps [0..0xFFFFFFFFF]
-
-function i64_clone(x)
- local o = {}; o.l = x.l; o.h = x.h; return o;
-end -- +assign regs
-
--- Type conversions
-
-
-function i64_toInt(a)
-  return (a.l + (a.h * (0xFFFFFFFF+1)));
-end -- supports value=2^53 or even less (better not to use)
-
-function i64i(a)
- return a.l;
-end -- simply return lowest reg.
-
-function i64_toString(a)
-  local s1=string.format("%x",a.l);
-  local s2=string.format("%x",a.h);
-  local s3="0000000000000000";
-  s3=string.sub(s3,1,16-string.len(s1))..s1;
-  s3=string.sub(s3,1,8-string.len(s2))..s2..string.sub(s3,9);
-  return "0x"..string.upper(s3);
+-- this loads and executes other .lua file
+function dofile (filename)
+  local f = assert(loadfile(filename))
+  return f()
 end
-
--- Bitwise operators (the main functionality)
-
-function i64_and(a,b)
- local o = {}; o.l = i64u( bit.band(a.l, b.l) ); o.h = i64u( bit.band(a.h, b.h) ); return o;
-end
-
-function i64_or(a,b)
- local o = {}; o.l = i64u( bit.bor(a.l, b.l) ); o.h = i64u( bit.bor(a.h, b.h) ); return o;
-end
-
-function i64_xor(a,b)
- local o = {}; o.l = i64u( bit.bxor(a.l, b.l) ); o.h = i64u( bit.bxor(a.h, b.h) ); return o;
-end
-
-function i64_not(a)
- local o = {}; o.l = i64u( bit.bnot(a.l) ); o.h = i64u( bit.bnot(a.h) ); return o;
-end
-
-function i64_neg(a)
- return i64_add( i64_not(a), i64(1) );
-end  -- negative is inverted and incremented by +1
-
--- Simple Math-functions
-
--- just to add, not rounded for overflows
-function i64_add(a,b)
- local o = {};
- o.l = a.l + b.l;
- local r = o.l - 0xFFFFFFFF;
- o.h = a.h + b.h;
- if( r>0 ) then
-   o.h = o.h + 1;
-   o.l = r-1;
- end
- return o;
-end
-
-
--- verify a>=b before usage
-function i64_sub(a,b)
-  local o = {}
-  o.l = a.l - b.l;
-  o.h = a.h - b.h;
-  if( o.l<0 ) then
-    o.h = o.h - 1;
-    o.l = o.l + 0xFFFFFFFF+1;
-  end
-  return o;
-end
-
--- x n-times
-function i64_by(a,n)
- local o = {};
- o.l = a.l;
- o.h = a.h;
- for i=2, n, 1 do
-   o = i64_add(o,a);
- end
- return o;
-end
-
-
--- Bit-shifting
-
-function i64_lshift(a,n)
- local o = {};
- if(n==0) then
-   o.l=a.l; o.h=a.h;
- else
-   if(n<32) then
-     o.l= i64u( bit.lshift( a.l, n) ); o.h=i64u( bit.lshift( a.h, n) )+ bit.rshift(a.l, (32-n));
-   else
-     o.l=0; o.h=i64u( bit.lshift( a.l, (n-32)));
-   end
-  end
-  return o;
-end
-
-function i64_rshift(a,n)
- local o = {};
- if(n==0) then
-   o.l=a.l; o.h=a.h;
- else
-   if(n<32) then
-     o.l= bit.rshift(a.l, n)+i64u( bit.lshift(a.h, (32-n))); o.h=bit.rshift(a.h, n);
-   else
-     o.l=bit.rshift(a.h, (n-32)); o.h=0;
-   end
-  end
-  return o;
-end
-
--- Comparisons
-
-function i64_eq(a,b)
- return ((a.h == b.h) and (a.l == b.l));
-end
-
-function i64_ne(a,b)
- return ((a.h ~= b.h) or (a.l ~= b.l));
-end
-
-function i64_gt(a,b)
- return ((a.h > b.h) or ((a.h == b.h) and (a.l >  b.l)));
-end
-
-function i64_ge(a,b)
- return ((a.h > b.h) or ((a.h == b.h) and (a.l >= b.l)));
-end
-
-function i64_lt(a,b)
- return ((a.h < b.h) or ((a.h == b.h) and (a.l <  b.l)));
-end
-
-function i64_le(a,b)
- return ((a.h < b.h) or ((a.h == b.h) and (a.l <= b.l)));
-end
-
-
-
+dofile( "i64.lua" );	-- int 64
 
 --
 -- Chess Engine
 --
-
+      g_sd = 3;		-- depth to think :)))) LOL
+      g_tm = 5;		-- seconds to think
+      
       g_VER = "OliThink 5.3.0 Java port to Lua";
 
       g_movemade = "";
@@ -192,7 +43,6 @@ end
       g_ROOK = 6;
       g_QUEEN = 7;
 
-      g_CNODES = 0xFFFF;
       g_HEUR = 9900000;
       g_pval = { 0, 100, 290, 0, 100, 310, 500, 950 };
 
@@ -242,13 +92,8 @@ end
       g_kvalue = {};	--[0 for x in range(64)]
       g_iter = 0;
       g_pieceChar = {"*", "P", "N", "K", ".", "B", "R", "Q"};
-      g_searchtime = 30;
-      g_maxtime = 60*60;
       g_starttime = 0;
       g_sabort = false;
-      g_noabort = false;
-
-      g_sd = 32;
 
       g_count = 0;
       g_flags = 0;
@@ -280,13 +125,13 @@ end
 
       g_Nonevar = { 13, 43, 149, 519, 1809, 6311, 22027 };
 
-      g_tm = 20;
       g_mps = 0;
       g_base = 5;
       g_inc = 0;
       g_post_ = true;
 
       g_0=i64(0);
+      g_gameover = "";
 
       function woutput(txt) -- messages on screen
         print(txt)
@@ -623,11 +468,10 @@ end
         local k = 0;
         local c = "";
         while(i<64) do
-
           c = ".";
-          k = 0;
+          k = 0;	  
           while(k<8) do
-            if( i64_gt( i64_and( g_pieceb[1+k], g_BITi[1+i] ), g_0 ) ) then
+            if( i64_ne( i64_and( g_pieceb[1+k], g_BITi[1+i] ), g_0 ) ) then
               if( i64_eq( i64_and( g_colorb[1+0] , g_BITi[1+i] ) , g_0 ) ) then
                 c = string.lower( g_pieceChar[1+k] );
               else
@@ -724,8 +568,7 @@ end
 
             if (s >= "1"  and  s <= "8") then
 
-              col = col .. (string.byte(s,1) - string.byte("0",1));
-
+              col = col + (string.byte(s,1) - string.byte("0",1));
 
             else
 
@@ -808,7 +651,6 @@ end
         _parse_fen(g_sfen);
 
         g_engine = 1;
-        g_sd = 32;
       end
 
       function LOW16(x)
@@ -2506,7 +2348,6 @@ end
         local nc = 1;
         local d = 0;
         local temp = i64(0);
-        local mtemp = i64(0);
         local b1 = i64(0);
         local colstore0 = i64_clone( g_colorb[1+0] );
         local colstore1 = i64_clone( g_colorb[1+1] );
@@ -2566,10 +2407,10 @@ end
             end
           end
 
-          mtemp = i64_neg( temp );
-          temp = i64_and( temp, mtemp );
+          temp = i64_and( temp, i64_neg( temp ) );
 
           g_colorb[1+c] = i64_xor( g_colorb[1+c], temp );
+		
           if ((bit.band(piece,4) ~= 0)  or  (piece == 1)) then
 
             if (bit.band(piece,1) ~= 0) then
@@ -2586,7 +2427,6 @@ end
           a_piece = g_pval[1+piece];
           nc = nc+1;
           c=bit.bxor(c,1);
-
         end
 
         while (nc ~= 1) do
@@ -2918,14 +2758,14 @@ end
 
         if (sf[1+0] < 7) then
           --Reduce the bonus for attacking king squares
-          katt = katt * math.floor( sf[1+0]/7 );
+          katt =  math.floor( katt * (sf[1+0]/7) );
         end
 
         if (sf[1+0] < 2) then
           sf[1+0] = 2;
         end
 
-        return (mn + katt);
+        return (mn + katt + (5-(os.clock()%10)));	-- let's give some random fun
       end
 
       function eval0(c)
@@ -2964,10 +2804,16 @@ end
         local c1=bit.bxor(c,1);
         local cont = false;
 
-        if (ply == 63) then
+        if (ply >= g_sd or g_sabort) then
           return (eval0(c) + cmat);
         end
 
+	if (g_nodes % 16 == 0) then
+          if(os.clock() - g_starttime >= g_tm and g_pvlength[1+0] > 0) then
+            g_sabort = true;
+          end
+        end
+	
         if (i64_eq(ch,g_0)) then
 
           if (cmat - 200 >= beta) then
@@ -2994,12 +2840,13 @@ end
         end
 
         i = -1;
-        while( (i+1) < g_movenum[1+ply]) do
+        while( (i+1) < g_movenum[1+ply] and (not g_sabort)) do
 
          i = i+1;
 
          m = qpick(g_movelist[1+ply], g_movenum[1+ply], i);
 
+        
          cont = (i64_eq(ch,g_0) and  (PROM(m) == 0)  and  (g_pval[1+PIECE(m)] > g_pval[1+CAP(m)])  and  (swap(m) < 0));
 
          if(not cont) then
@@ -3088,7 +2935,6 @@ end
 
       function search(ch,c,d,ply,alpha,beta,pvnode,isNone)
 
-        local consumed = 0;
         local hp=i64(0);
         local hb=i64(0);
         local he=i64(0);
@@ -3113,25 +2959,19 @@ end
         local cont = false;
 
         g_pvlength[1+ply] = ply;
-
-        if (ply == 63) then
+	
+        if (ply >= g_sd or g_sabort) then
           return (eval0(c) + iif(c ~= 0, -g_mat_, g_mat_));
         end
 
         g_nds = g_nds+1;
 
-        if (bit.band(g_nds, g_CNODES) == 0) then
-
-          consumed = os.clock() - g_starttime;
-          if ( consumed > g_maxtime  or  (consumed > g_searchtime  and  (not g_noabort))) then
+        if (g_nds % 16 == 0) then
+          if(os.clock() - g_starttime >= g_tm and g_pvlength[1+0] > 0) then
             g_sabort = true;
           end
         end
-
-        if (g_sabort) then
-          return 0;
-        end
-
+	
         hp = HASHP(c);
         if ((ply ~= 0)  and  (ig_sdraw(hp, 1) ~= 0)) then
           return 0;
@@ -3148,7 +2988,7 @@ end
         he = g_hashDB[1+v];
         if ((he~=nil) and i64_eq( i64_and(i64_xor(he,hb), g_HINVB), g_0 )) then
 
-		  g_hc = g_hc + 1;
+          g_hc = g_hc + 1;
           w = LOW16(he.l) - 32768;
           if (bit.band(he.l, 0x10000) ~= 0) then
 
@@ -3228,7 +3068,7 @@ end
         asave = alpha;
         first = 1;
 
-        while (i ~= n) do
+        while ((i ~= n) and (not g_sabort)) do
 
          i = i+1;
          ext = 0;
@@ -3282,9 +3122,6 @@ end
           if ((first ~= 0)  and  (pvnode ~= 0)) then
 
             w = -search(nch, c1, d-1+ext, ply+1, -beta, -alpha, 1, 1)
-            if (ply == 0) then
-              g_noabort = ((g_iter > 1)  and  (w < g_kvalue[1+g_iter-1] - 40));
-            end
 
           else
 
@@ -3336,9 +3173,6 @@ end
               end
 
               g_pvlength[1+ply] = g_pvlength[1+ply +1];
-              if ((ply == 0)  and  (g_iter > 1)  and  (w > g_kvalue[1+g_iter-1] - 20)) then
-                g_noabort = false;
-              end
 
               if (w == 31999 - ply) then
                 return w;
@@ -3392,13 +3226,12 @@ end
         if (g_movenum[1+0] == 0) then
 
           if (i == 0) then
-
-            print("1/2-1/2 Stalemate");
+            g_gameover = "1/2-1/2 Stalemate";
             return 4;
 
           else
 
-            print(  iif(c == 1, "1-0 White mates", "0-1 Black mates") );
+            g_gameover = iif(c == 1, "1-0 White mates", "0-1 Black mates");
             return (5 + c);
 
           end
@@ -3406,15 +3239,17 @@ end
         end
 
         c = ig_sdraw(HASHP(c), 2);
-
+	-- Lets ignore repeats and play till checkmate
+	c = 0;
+	
         if( c==1 ) then
-          print("1/2-1/2 Draw by Repetition");
+          g_gameover = "1/2-1/2 Draw by Repetition";
         else
           if( c==2 ) then
-            print("1/2-1/2 Draw by Fifty Move Rule");
+            g_gameover = "1/2-1/2 Draw by Fifty Move Rule";
           else
             if( c==3 ) then
-              print("1/2-1/2 Insufficient material");
+              g_gameover = "1/2-1/2 Insufficient material";
             else
               c = 0;
             end
@@ -3465,6 +3300,7 @@ end
         local c2 = "";
         local h = 0;
         local i = 0;
+	local sp = 0;
 
         if (string.sub(s,1,5)=="O-O-O") then
           s = iif(u ~= 0, "Kc8", "Kc1");
@@ -3602,11 +3438,10 @@ end
         undoMove( nil, g_onmove);
       end
 
-      function calc(g_sd,g_tm)
+      function calc()
 
         local s="";
         local t1 = 0;
-        local m2go = 32;
         local ch = attacked(g_kingpos[1+g_onmove], g_onmove);
         g_eval1 = 0;
         g_iter = 0;
@@ -3615,44 +3450,30 @@ end
         g_nodes = 0;
         g_nds = 0;
         g_hc = 0;
-
-        if (g_mps > 0) then
-          m2go = 1 + g_mps - ( math.floor(COUNT()/2) % g_mps);
-        end
-
+        g_gameover = "";
+	
 	-- we simply set search time
         g_movemade = "";
-        g_searchtime = g_tm;	--math.floor( (g_tm*10)/m2go ) + g_inc;
-        g_maxtime = g_tm;	--iif(g_inc ~= 0, g_tm*3, g_tm*2);
 
         g_starttime = os.clock();
 
         g_iter = 1;
         while(g_iter <= g_sd) do
 
-          g_noabort = false;
           g_kvalue[1+g_iter] = search(ch, g_onmove, g_iter, 0, -32000, 32000, 1, 0);
-          t1 = (os.clock() - g_starttime)
-          if ((g_sabort)  and  (g_pvlength[1+0] == 0)) then
-            g_iter = g_iter-1;
-            if(g_iter ~= 0) then
-              break;
-            end
+
+          if (g_sabort) then
+             break;
           end
-
+	  
           if ((g_post_)  and  (g_pvlength[1+0] > 0)) then
-
+            t1 = (os.clock() - g_starttime);
             s = string.format("%d",g_iter)..". ";
             s = s..string.format("%d",g_kvalue[1+g_iter]).." ";
             s = s..string.format("%d",math.floor(t1)).."s ";
             s = s..string.format("%d",g_nds+g_nodes ).." nodes ";
-
             print(s);
             displaypv();
-          end
-
-          if ((g_iter >= 32000-g_kvalue[1+g_iter])  or  (g_sabort)  or  (t1 > g_searchtime)) then
-            break;
           end
 
           g_iter = g_iter+1;
@@ -3660,10 +3481,10 @@ end
         end
 
         if (g_post_) then
+          t1 = (os.clock() - g_starttime);
           s = ""
-          s = s.."kibitz W: "..string.format("%d",g_kvalue[1+  iif(g_iter > g_sd, g_sd, g_iter) ]);
           s = s.." Nodes: ".. string.format("%d",g_nds);
-          s = s.." QNodes: ".. string.format("%d",g_nodes);
+	  s = s.." QNodes: ".. string.format("%d",g_nodes);
           s = s.." HashNd: ".. string.format("%d",g_hc);
           s = s.." Evals: ".. string.format("%d",g_eval1);
           s = s.." Secs: ".. string.format("%d",math.floor(t1) );
@@ -3679,7 +3500,7 @@ end
 
       function gomove()
         g_engine = g_onmove
-        g_ex = calc(g_sd, g_tm);
+        g_ex = calc();
       end
 
       function entermove(buf)
@@ -3872,17 +3693,22 @@ end
         print("Autogame!");
 
         while(true) do
-          g_ex = calc(g_sd, g_tm);
+          g_ex = calc();
           printboard();
-
+	  
           local mr = COUNT(); -- just export to pgn-viewer
           if(mr%2>0) then
             g_pgn = g_pgn..string.format( "%d",math.floor(mr/2)+1 )..".";
           end
           g_pgn = g_pgn..mvstr( g_p_v[1+0][1+0], true ).." ";
-          print(g_pgn);
-
+	   
           if( g_ex ~= 0 ) then
+	    if(string.find(g_gameover,"mates")~=nil) then
+		g_pgn = g_pgn.."#"
+	    end
+            print(g_pgn);
+	    printboard();
+	    print(g_gameover);
             break;
           end
         end
@@ -3896,36 +3722,6 @@ end
       woutput( g_VER );
       init();
 
-      g_sd = 7;			-- depth
-      g_tm = 120;		-- seconds
-
       printboard();
-
+	   
       autogame();
-
-
-      --entermove("g1f3");
-      --entermove("a7a5");
-      --entermove("h2h4");
-      --entermove("a5a4");
-      --entermove("c2c3");
-      --entermove("g7g6");
-      --entermove("d2d3");
-      --entermove("b7b6");
-      --entermove("d1d2");
-      --entermove("h7h6");
-      --entermove("b2b4");
-      --entermove("a4b3");
-      --entermove("g2g3");
-      --entermove("b3b2");
-      --entermove("f1g2");
-      --entermove("b2a1r");
-      --entermove("e1g1");
-      --printboard();
-
-      --entermove("b1c3");
-      --undo();
-      --entermove("e2e4");
-
-      --gomove();
-      --printboard();

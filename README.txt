@@ -6,9 +6,8 @@ This is a small sample of Lua based chess to run from command line.
 2. fruit21chess.bat - good port of Fruit chess engine to Lua
  (ported from C++)
 
-3. EmulatedOliThink.bat - some kind of scientific port of 64bit strong chess engine -
-   plays wrong moves because it is impossible to calculate millions of nodes on Lua required by algorithm.
- (ported from java)
+3. EmulatedOliThink.bat - kind of scientific port of a 64bit chess engine.
+  NOT a useful Lua chess AI. Anyway, interesting to see checkmate at the end:)
 
 4. c0_chess.bat - a lua library for chess
 
@@ -19,4 +18,19 @@ This is a small sample of Lua based chess to run from command line.
 6. LuaJester.bat - Very good chess program for 32-bits, and fast. Almost best what lua can perform.
 
 7. JesterPureLua.bat - the same Jester without BitOp requirement,
-   bitwises are little bit slower but working based on pure Lua scripts. 
+   bitwises are little bit slower but working based on pure Lua scripts.
+
+
+Other:
+---------
+
+1. polybase.bat - a polyglot book reader sample
+
+2. abkbase.bat - an Arena book reader sample
+
+
+
+Also lua to loadfile:
+---------------------
+i64.lua - emulated 64bit variables to get working (1<<63)
+c0_chess_subroutine.lua - chess logic, not a fastest code
