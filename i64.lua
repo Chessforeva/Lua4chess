@@ -11,9 +11,10 @@ function i64_ax(h,l)
  local o = {}; o.l = l; o.h = h; return o;
 end -- +assign 64-bit v.as 2 regs
 
+-- unsigned [0..0xFFFFFFFF]
 function i64u(x)
  return bit.band( ( bit.lshift(bit.rshift(x,1),1) + bit.band(x,1) ), 0xFFFFFFFF);
-end -- keeps [0..0xFFFFFFFFF]
+end 
 
 function i64_clone(x)
  local o = {}; o.l = x.l; o.h = x.h; return o;
@@ -23,7 +24,7 @@ end -- +assign regs
 
 
 function i64_toInt(a)
-  return (a.l + (a.h * (0xFFFFFFFF+1)));
+  return (a.l + (a.h * (0x100000000)));
 end -- supports value=2^53 or even less (better not to use)
 
 function i64i(a)
@@ -58,42 +59,20 @@ function i64_not(a)
 end
 
 function i64_neg(a)
- return i64_add( i64_not(a), i64(1) );
+ return i64_inc( i64_not(a) );
 end  -- negative is inverted and incremented by +1
 
 -- Simple Math-functions
 
 -- just to add, not rounded for overflows
-function i64_add(a,b)
+function i64_inc(a)
  local o = {};
- o.l = a.l + b.l
- o.h = a.h + b.h;
- if((o.l<a.l) or (o.l<b.l)) then
-   o.h = o.h + 1;
- end
- return o;
-end
-
-
--- verify a>=b before usage
-function i64_sub(a,b)
-  local o = {}
-  o.l = a.l - b.l;
-  o.h = a.h - b.h;
-  if((o.l>a.l) or (o.l>b.l)) then
-    o.h = o.h - 1;
-  end
-  return o;
-end
-
--- x n-times
-function i64_by(a,n)
- local o = {};
- o.l = a.l;
- o.h = a.h;
- for i=2, n, 1 do
-   o = i64_add(o,a);
- end
+ o.l = i64u(a.l+1);
+ if( o.l==0 ) then
+   o.h = i64u(a.h+1);
+ else
+   o.h = i64u(a.h);
+ end  
  return o;
 end
 
@@ -177,3 +156,10 @@ function i64_le(a,b)
  return ((a.h < b.h) or ((a.h == b.h) and (a.l <= b.l)));
 end
 
+function i64_is0(a,b)
+ return ((a.l == 0) and (a.h == 0));
+end
+
+function i64_nz(a,b)
+ return ((a.l ~= 0) or (a.h ~= 0));
+end

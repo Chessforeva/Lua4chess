@@ -1,16 +1,13 @@
---=====================================
--- It is not a usable Lua Chess engine!
---=====================================
+--=========================================
+-- It is not lua-appropriate Chess engine!
+--=========================================
 -- This "porting fun" is based on OliThink.
 -- Very experimental lua mix, emulated, slow, do not use for projects!
--- It's for fun only.
--- Able to checkmate by the way :)
--- Nothing more.
+-- It's for fun only. Able to checkmate by the way :)
 --
 -- Requires library for bitwise operations http://bitop.luajit.org/
 -- Emulates 64bit numbers
--- Generates rays_mem.txt on first run with pre-calculated numbers
---   (some kind of memory saving for faster performance)
+--  Generates rays_mem.txt on first run with pre-calculated numbers
 --
 -- LuaJIT
 
@@ -26,9 +23,9 @@ dofile( "i64.lua" );	-- int 64
 --
 -- Chess Engine
 --
-      g_sd = 3;		-- depth to think :)))) LOL
-      g_tm = 5;		-- seconds to think
-      
+      g_sd = 4;		-- depth to think :)))) LOL
+      g_tm = 8;		-- seconds to think
+
       g_VER = "OliThink 5.3.0 Java port to Lua";
 
       g_movemade = "";
@@ -368,7 +365,7 @@ dofile( "i64.lua" );	-- int 64
       end
 
       function TEST(f,b)
-        return i64_ne( i64_and( g_BITi[1+f], b), g_0 );
+        return i64_nz( i64_and( g_BITi[1+f], b) );
       end
 
       function g_ENPASS()
@@ -401,17 +398,17 @@ dofile( "i64.lua" );	-- int 64
 
       function _getpiece(s,c)
 
-        local i=0;
+        local i=0, p;
         while(i<8) do
-
-          if (g_pieceChar[1+i] == s) then
+          p = g_pieceChar[1+i];
+          if (p == s) then
 
             c[1+0] = 0;
             return i;
 
           else
 
-            if (g_pieceChar[1+i] == string.upper(s)) then
+            if (p == string.upper(s)) then
 
               c[1+0] = 1;
               return i;
@@ -469,13 +466,12 @@ dofile( "i64.lua" );	-- int 64
         local c = "";
         while(i<64) do
           c = ".";
-          k = 0;	  
+          k = 0;
           while(k<8) do
-            if( i64_ne( i64_and( g_pieceb[1+k], g_BITi[1+i] ), g_0 ) ) then
-              if( i64_eq( i64_and( g_colorb[1+0] , g_BITi[1+i] ) , g_0 ) ) then
-                c = string.lower( g_pieceChar[1+k] );
-              else
-                c = g_pieceChar[1+k];
+            if( i64_nz( i64_and( g_pieceb[1+k], g_BITi[1+i] ) ) ) then
+              c = g_pieceChar[1+k];
+              if( i64_is0( i64_and( g_colorb[1+0] , g_BITi[1+i] ) ) ) then
+                c = string.lower(c);
               end
             end
             k = k+1;
@@ -775,17 +771,18 @@ dofile( "i64.lua" );	-- int 64
 
       function key090(b,f)
         local a = i64_rshift( b, bit.band(f,7) );
-        local h = a.l;
-        h = bit.bor(bit.band(h, 0x1010101) , bit.band( bit.rshift(h, 31), 0x2020202));
-        h = bit.bor(bit.band(h, 0x303) , bit.band(bit.rshift(h, 14), 0xC0C));
-        return bit.bor(bit.band(h, 0xE) , bit.band(bit.rshift(h, 4), 0x70));
+        local L = a.l;
+        local H = bit.lshift( a.h, 1 );
+        L = bit.bor(bit.band(L, 0x1010101) , bit.band( H, 0x2020202));
+        L = bit.bor(bit.band(L, 0x303) , bit.band(bit.rshift(L, 14), 0xC0C));
+        return bit.bor(bit.band(L, 0xE) , bit.band(bit.rshift(L, 4), 0x70));
       end
 
-      function keyDiag(_b)
-        local h = bit.bor(_b.l , _b.h);
-        h = bit.bor(h, bit.rshift(h,16));
-        h = bit.bor(h, bit.rshift(h,8));
-        return bit.band(h, 0x7E);
+      function keyDiag(b)
+        local L = bit.bor(b.l , b.h);
+        L = bit.bor(L, bit.rshift(L,16));
+        L = bit.bor(L, bit.rshift(L,8));
+        return bit.band(L, 0x7E);
       end
 
       function key045(b,f)
@@ -802,25 +799,25 @@ dofile( "i64.lua" );	-- int 64
 
       function battacked(f,c)
 
-        if ( i64_ne( i64_and(PCAP(f, c) , g_pieceb[1+g_PAWN]) , g_0 ) ) then
+        if ( i64_nz( i64_and(PCAP(f, c) , g_pieceb[1+g_PAWN]) ) ) then
           return true;
         end
-        if ( i64_ne( i64_and(NCAP(f, c) , g_pieceb[1+g_KNIGHT]) , g_0 ) ) then
+        if ( i64_nz( i64_and(NCAP(f, c) , g_pieceb[1+g_KNIGHT]) ) ) then
           return true;
         end
-        if ( i64_ne( i64_and(KCAP(f, c) , g_pieceb[1+g_KING]) , g_0 ) ) then
+        if ( i64_nz( i64_and(KCAP(f, c) , g_pieceb[1+g_KING]) ) ) then
           return true;
         end
-        if ( i64_ne( i64_and(RCAP1(f, c) , RQU()) , g_0 ) ) then
+        if ( i64_nz( i64_and(RCAP1(f, c) , RQU()) ) ) then
           return true;
         end
-        if ( i64_ne( i64_and(RCAP2(f, c) , RQU()) , g_0 ) ) then
+        if ( i64_nz( i64_and(RCAP2(f, c) , RQU()) ) ) then
           return true;
         end
-        if ( i64_ne( i64_and(BCAP3(f, c) , BQU()) , g_0 ) ) then
+        if ( i64_nz( i64_and(BCAP3(f, c) , BQU()) ) ) then
           return true;
         end
-        if ( i64_ne( i64_and(BCAP4(f, c) , BQU()) , g_0 ) ) then
+        if ( i64_nz( i64_and(BCAP4(f, c) , BQU()) ) ) then
           return true;
         end
         return false;
@@ -975,16 +972,24 @@ dofile( "i64.lua" );	-- int 64
         local perm = i64_clone(fr);
         local i = 0;
         local low = i64(0);
-	    local nlow = i64(0);
+        local nlow = i64(0);
 
         while( i < bc ) do
 
           low = getLowestBit(fr1);
-		  nlow = i64_not(low);
-          fr1 = i64_and( fr1, nlow );
+	  local l1 = i64_toString(low)
+
+          nlow = i64_not(low);
+          local n1 = i64_toString(nlow)
+
+	  fr1 = i64_and( fr1, nlow );
+
+	  local fr9 = i64_toString(fr1)
+
 
           if (not TEST(i, dl)) then
             perm = i64_and( perm, nlow );
+		local p9 = i64_toString(perm)
           end
 
           i = i+1;
@@ -1470,7 +1475,7 @@ dofile( "i64.lua" );	-- int 64
           end
 
         else
-          if ( i64_eq( i64_or(g_pieceb[1+g_PAWN] , RQU()), g_0 ) ) then
+          if ( i64_is0( i64_or(g_pieceb[1+g_PAWN] , RQU()) ) ) then
 
             --Check for mating material
             if ( (g_BITCnt(g_colorb[1+0]) <= 2)  and  (g_BITCnt(g_colorb[1+1]) <= 2) ) then
@@ -1489,7 +1494,7 @@ dofile( "i64.lua" );	-- int 64
         local t = 0;
 
         b = i64_and( i64_and( i64_or(RXRAY1(f) , RXRAY2(f)) , g_colorb[1+oc]) , RQU() );
-        while ( i64_ne( b, g_0 ) ) do
+        while ( i64_nz( b ) ) do
 
           t = getg_LSB(b);
           b = i64_xor( b, g_BITi[1+t] );
@@ -1499,7 +1504,7 @@ dofile( "i64.lua" );	-- int 64
 
         b = i64_and( i64_and( i64_or(BXRAY3(f) , BXRAY4(f)) , g_colorb[1+oc]) , BQU() );
 
-        while ( i64_ne( b, g_0 ) ) do
+        while ( i64_nz( b ) ) do
 
           t = getg_LSB(b);
           b = i64_xor( b, g_BITi[1+t] );
@@ -1684,7 +1689,7 @@ dofile( "i64.lua" );	-- int 64
         local bc1=i64_clone(bc);
         local n = 0;
 
-        while ( i64_ne( bc1, g_0 ) ) do
+        while ( i64_nz( bc1 ) ) do
 
           t = getg_LSB(bc1);
           bc1 = i64_xor( bc1, g_BITi[1+t] );
@@ -1702,7 +1707,7 @@ dofile( "i64.lua" );	-- int 64
         local bm1=i64_clone(bm);
         local n = 0;
 
-        while ( i64_ne( bc1, g_0 ) ) do
+        while ( i64_nz( bc1 ) ) do
 
           t = getg_LSB(bc1);
           bc1 = i64_xor( bc1, g_BITi[1+t] );
@@ -1712,7 +1717,7 @@ dofile( "i64.lua" );	-- int 64
 
         end
 
-        while ( i64_ne( bm1, g_0 ) ) do
+        while ( i64_nz( bm1 ) ) do
 
           t = getg_LSB(bm1);
           bm1 = i64_xor( bm1, g_BITi[1+t] );
@@ -1732,7 +1737,7 @@ dofile( "i64.lua" );	-- int 64
         local m = 0;
         local n = 0;
 
-        while ( i64_ne( bc1, g_0 ) ) do
+        while ( i64_nz( bc1 ) ) do
 
           t = getg_LSB(bc1);
           bc1 = i64_xor( bc1, g_BITi[1+t] );
@@ -1755,7 +1760,7 @@ dofile( "i64.lua" );	-- int 64
 
         end
 
-        while ( i64_ne( bm1, g_0 ) ) do
+        while ( i64_nz( bm1 ) ) do
 
           t = getg_LSB(bm1);
           bm1 = i64_xor( bm1, g_BITi[1+t] );
@@ -1786,7 +1791,7 @@ dofile( "i64.lua" );	-- int 64
         local bm1=i64_clone(bm);
         local n = 0;
 
-        while ( i64_ne( bc1, g_0 ) ) do
+        while ( i64_nz( bc1 ) ) do
 
           t = getg_LSB(bc1);
           bc1 = i64_xor( bc1, g_BITi[1+t] );
@@ -1801,7 +1806,7 @@ dofile( "i64.lua" );	-- int 64
 
         end
 
-        while ( i64_ne( bm1, g_0 ) ) do
+        while ( i64_nz( bm1 ) ) do
 
           t = getg_LSB(bm1);
           bm1 = i64_xor( bm1, g_BITi[1+t] );
@@ -1846,7 +1851,7 @@ dofile( "i64.lua" );	-- int 64
         --Can we capture the checker?
         cc = i64_and( attacked(bf, c1), apin );
 
-        while ( i64_ne( cc, g_0 ) ) do
+        while ( i64_nz( cc ) ) do
 
           cf = getg_LSB(cc);
           cc = i64_xor( cc, g_BITi[1+cf] );
@@ -1863,11 +1868,11 @@ dofile( "i64.lua" );	-- int 64
 
         end
 
-        if ((g_ENPASS() ~= 0) and i64_ne( i64_and(ch, g_pieceb[1+g_PAWN]), g_0) ) then
+        if ((g_ENPASS() ~= 0) and i64_nz( i64_and(ch, g_pieceb[1+g_PAWN]) ) ) then
 
           --Enpassant capture of attacking Pawn
           cc = i64_and( i64_and( PCAP(g_ENPASS(), c1) , g_pieceb[1+g_PAWN] ), apin );
-          while ( i64_ne( cc, g_0 ) ) do
+          while ( i64_nz( cc ) ) do
 
             cf = getg_LSB(cc);
             cc = i64_xor( cc, g_BITi[1+cf] );
@@ -1875,7 +1880,7 @@ dofile( "i64.lua" );	-- int 64
           end
         end
 
-        if ( i64_ne(i64_and(ch, i64_or(g_nmoves[1+k], g_kmoves[1+k])), g_0) ) then
+        if ( i64_nz(i64_and(ch, i64_or(g_nmoves[1+k], g_kmoves[1+k])) ) ) then
           --We can not move anything between!
           return 1;
         end
@@ -1895,13 +1900,13 @@ dofile( "i64.lua" );	-- int 64
           end
         end
 
-        while ( i64_ne( fl, g_0 ) ) do
+        while ( i64_nz( fl ) ) do
 
           f = getg_LSB(fl);
           fl = i64_xor( fl, g_BITi[1+f] );
 
           cc = i64_and( reach(f, c1), apin );
-          while ( i64_ne( cc, g_0 ) ) do
+          while ( i64_nz( cc ) ) do
 
             cf = getg_LSB(cc);
             cc = i64_xor( cc, g_BITi[1+cf] );
@@ -1917,7 +1922,7 @@ dofile( "i64.lua" );	-- int 64
            ww = i64_and( ww , g_colorb[1+c] );
            ww = i64_and( ww , apin );
 
-           if ( i64_ne( ww, g_0 ) ) then
+           if ( i64_nz( ww ) ) then
 
             if (RANK(bf, iif(c ~= 0, 0x08, 0x30) )) then
               registerProms(bf, c, g_0, g_BITi[1+f], ml, mn);
@@ -1932,7 +1937,7 @@ dofile( "i64.lua" );	-- int 64
             ww = i64_and( g_BITi[1+ iif(c ~= 0, f+16, f-16) ] , g_pieceb[1+g_PAWN] );
             ww = i64_and( ww , g_colorb[1+c] );
             ww = i64_and( ww , apin );
-            if ( i64_ne( ww, g_0 ) and i64_eq( i64_and( BOARD() , g_BITi[1+bf] ), g_0 ) ) then
+            if ( i64_nz( ww ) and i64_is0( i64_and( BOARD() , g_BITi[1+bf] ) ) ) then
               registerMoves(PREMOVE( iif(c ~= 0, f+16, f-16 ), g_PAWN, c), g_0, g_BITi[1+f], ml, mn);
             end
 
@@ -1964,7 +1969,7 @@ dofile( "i64.lua" );	-- int 64
         local b1=i64(0);
         local b2=i64(0);
 
-        if ( i64_ne( ch, g_0 ) ) then
+        if ( i64_nz( ch ) ) then
 
           ret = generateCheckEsc(ch, npin, c, f, ml, mn);
           g_movenum[1+ply] = mn[1+0];
@@ -1976,14 +1981,14 @@ dofile( "i64.lua" );	-- int 64
 
         cb = i64_and( g_colorb[1+c] , npin );
         b = i64_and( g_pieceb[1+g_PAWN] , cb );
-        while ( i64_ne( b, g_0 ) ) do
+        while ( i64_nz( b ) ) do
 
           f = getg_LSB(b);
           b = i64_xor( b, g_BITi[1+f] );
           m = PMOVE(f, c);
           a = PCAP(f, c);
 
-          if ( i64_ne( m, g_0 )  and  RANK(f, iif( c ~= 0, 0x30, 0x08) )) then
+          if ( i64_nz( m )  and  RANK(f, iif( c ~= 0, 0x30, 0x08) )) then
             m = i64_or( m, PMOVE( iif(c ~= 0, f-8, f+8), c) );
           end
 
@@ -1993,14 +1998,14 @@ dofile( "i64.lua" );	-- int 64
 
           else
 
-            if( (g_ENPASS() ~= 0)  and  i64_ne( i64_and(g_BITi[1+g_ENPASS()] , g_pcaps[1+c][1+f]) , g_0) ) then
+            if( (g_ENPASS() ~= 0)  and  i64_nz( i64_and(g_BITi[1+g_ENPASS()] , g_pcaps[1+c][1+f]) ) ) then
 
               clbd = bit.bxor( g_ENPASS(), 8 );
               g_colorb[1+c] = i64_xor( g_colorb[1+c], g_BITi[1+clbd] );
               hh = ROCC1(f);
               b1 = i64_and(hh, g_BITi[1+g_kingpos[1+c]]);
               b2 = i64_and( i64_and(hh, g_colorb[1+c1]), RQU() );
-              if (  i64_eq( b1, g_0 ) or i64_eq( b2, g_0 ) ) then
+              if ( i64_is0( b1 ) or i64_is0( b2 ) ) then
                 a = i64_or( a, g_BITi[1+g_ENPASS()] );
               end
 
@@ -2015,7 +2020,7 @@ dofile( "i64.lua" );	-- int 64
         end
 
         b = i64_and( pin, g_pieceb[1+g_PAWN] );
-        while ( i64_ne( b, g_0 ) ) do
+        while ( i64_nz( b ) ) do
 
          f = getg_LSB(b);
          b = i64_xor( b, g_BITi[1+f] );
@@ -2029,7 +2034,7 @@ dofile( "i64.lua" );	-- int 64
 
             m = PMOVE(f, c);
 
-            if ( i64_ne(m,g_0)  and  RANK(f, iif( c ~= 0, 0x30, 0x08) )) then
+            if ( i64_nz( m ) and RANK(f, iif( c ~= 0, 0x30, 0x08) )) then
               m = i64_or( m, PMOVE( iif(c ~= 0, f-8, f+8 ), c) );
             end
 
@@ -2057,7 +2062,7 @@ dofile( "i64.lua" );	-- int 64
         end
 
         b = i64_and( g_pieceb[1+g_KNIGHT] , cb );
-        while ( i64_ne( b, g_0 ) ) do
+        while ( i64_nz( b ) ) do
 
           f = getg_LSB(b);
           b = i64_xor( b, g_BITi[1+f] );
@@ -2068,23 +2073,23 @@ dofile( "i64.lua" );	-- int 64
 
         b = i64_and( g_pieceb[1+g_ROOK] , cb );
 
-        while ( i64_ne( b, g_0 ) ) do
+        while ( i64_nz( b ) ) do
 
           f = getg_LSB(b);
           b = i64_xor( b, g_BITi[1+f] );
           registerMoves(PREMOVE(f, g_ROOK, c), RCAP(f, c), RMOVE(f), ml, mn);
-          if ( (CASTLE() ~= 0)  and  i64_eq( ch, g_0 ) ) then
+          if ( (CASTLE() ~= 0)  and  i64_is0( ch ) ) then
             if (c ~= 0) then
               b1 = i64_and( RMOVE1(63) , g_BITi[1+61] );
 
-              if ((bit.band(g_flags, 128) ~= 0)  and  (f == 63)  and i64_ne( b1, g_0 ) ) then
+              if ((bit.band(g_flags, 128) ~= 0)  and  (f == 63)  and i64_nz( b1 ) ) then
                 if (not DUALATT(61, 62, c)) then
                   registerMoves(PREMOVE(60, g_KING, c), g_0, g_BITi[1+62], ml, mn);
                 end
               end
 
               b1 = i64_and( RMOVE1(56) , g_BITi[1+59] );
-              if ((bit.band(g_flags, 512) ~= 0)  and  (f == 56)  and i64_ne( b1, g_0 ) ) then
+              if ((bit.band(g_flags, 512) ~= 0)  and  (f == 56)  and i64_nz( b1 ) ) then
                 if (not DUALATT(59, 58, c)) then
                   registerMoves(PREMOVE(60, g_KING, c), g_0, g_BITi[1+58], ml, mn);
                 end
@@ -2093,14 +2098,14 @@ dofile( "i64.lua" );	-- int 64
             else
 
               b1 = i64_and( RMOVE1(7) , g_BITi[1+5] );
-              if ((bit.band(g_flags, 64) ~= 0)  and  (f == 7)  and i64_ne( b1, g_0 ) ) then
+              if ((bit.band(g_flags, 64) ~= 0)  and  (f == 7)  and i64_nz( b1 ) ) then
                 if (not DUALATT(5, 6, c)) then
                   registerMoves(PREMOVE(4, g_KING, c), g_0, g_BITi[1+6], ml, mn);
                 end
               end
 
               b1 = i64_and( RMOVE1(0) , g_BITi[1+3] );
-              if ((bit.band(g_flags, 256) ~= 0)  and  (f == 0)  and i64_ne( b1, g_0 )) then
+              if ((bit.band(g_flags, 256) ~= 0)  and  (f == 0)  and i64_nz( b1 )) then
                 if (not DUALATT(3, 2, c)) then
                   registerMoves(PREMOVE(4, g_KING, c), g_0, g_BITi[1+2], ml, mn);
                 end
@@ -2111,7 +2116,7 @@ dofile( "i64.lua" );	-- int 64
 
         b = i64_and( g_pieceb[1+g_BISHOP] , cb );
 
-        while ( i64_ne( b, g_0 ) ) do
+        while ( i64_nz( b ) ) do
 
           f = getg_LSB(b);
           b = i64_xor( b, g_BITi[1+f] );
@@ -2121,7 +2126,7 @@ dofile( "i64.lua" );	-- int 64
 
         b = i64_and( g_pieceb[1+g_QUEEN] , cb );
 
-        while ( i64_ne( b, g_0 ) ) do
+        while ( i64_nz( b ) ) do
 
           f = getg_LSB(b);
           b = i64_xor( b, g_BITi[1+f] );
@@ -2134,7 +2139,7 @@ dofile( "i64.lua" );	-- int 64
         b = i64_or( i64_or( g_pieceb[1+g_ROOK], g_pieceb[1+g_BISHOP] ), g_pieceb[1+g_QUEEN] );
         b = i64_and( pin, b );
 
-        while ( i64_ne( b, g_0 ) ) do
+        while ( i64_nz( b ) ) do
 
           f = getg_LSB(b);
           b = i64_xor( b, g_BITi[1+f] );
@@ -2181,7 +2186,7 @@ dofile( "i64.lua" );	-- int 64
         local b2=i64(0);
         local hh=i64(0);
 
-        if ( i64_ne( ch, g_0 ) ) then
+        if ( i64_nz( ch ) ) then
 
           ret = generateCheckEsc(ch, npin, c, f, ml, mn);
           g_movenum[1+ply] = mn[1+0];
@@ -2193,7 +2198,7 @@ dofile( "i64.lua" );	-- int 64
 
         cb = i64_and( g_colorb[1+c] , npin );
         b = i64_and( g_pieceb[1+g_PAWN] , cb );
-        while ( i64_ne( b, g_0 ) ) do
+        while ( i64_nz( b ) ) do
 
           f = getg_LSB(b);
           b = i64_xor( b, g_BITi[1+f] );
@@ -2205,7 +2210,7 @@ dofile( "i64.lua" );	-- int 64
 
           else
 
-            if ((g_ENPASS() ~= 0)  and i64_ne( i64_and(g_BITi[1+g_ENPASS()] , g_pcaps[1+c][1+f]) , g_0) ) then
+            if ((g_ENPASS() ~= 0)  and i64_nz( i64_and(g_BITi[1+g_ENPASS()] , g_pcaps[1+c][1+f]) ) ) then
 
               clbd = bit.bxor( g_ENPASS(), 8 );
               g_colorb[1+c] = i64_xor( g_colorb[1+c], g_BITi[1+clbd] );
@@ -2214,7 +2219,7 @@ dofile( "i64.lua" );	-- int 64
 
               b1 = i64_and(hh, g_BITi[1+g_kingpos[1+c]]);
               b2 = i64_and( i64_and(hh, g_colorb[1+c1]), RQU() );
-              if (  i64_eq( b1, g_0 ) or i64_eq( b2, g_0 ) ) then
+              if ( i64_is0( b1 ) or i64_is0( b2 ) ) then
                 a = i64_or( a, g_BITi[1+g_ENPASS()] );
               end
 
@@ -2230,7 +2235,7 @@ dofile( "i64.lua" );	-- int 64
         end
 
         b = i64_and( pin, g_pieceb[1+g_PAWN] );
-        while ( i64_ne( b, g_0 ) ) do
+        while ( i64_nz( b ) ) do
 
          f = getg_LSB(b);
          b = i64_xor( b, g_BITi[1+f] );
@@ -2266,7 +2271,7 @@ dofile( "i64.lua" );	-- int 64
         end
 
         b = i64_and( g_pieceb[1+g_KNIGHT] , cb );
-        while ( i64_ne( b, g_0 ) ) do
+        while ( i64_nz( b ) ) do
 
 
           f = getg_LSB(b);
@@ -2277,7 +2282,7 @@ dofile( "i64.lua" );	-- int 64
 
 
         b = i64_and( g_pieceb[1+g_BISHOP] , cb );
-        while ( i64_ne( b, g_0 ) ) do
+        while ( i64_nz( b ) ) do
 
           f = getg_LSB(b);
           b = i64_xor( b, g_BITi[1+f] );
@@ -2287,7 +2292,7 @@ dofile( "i64.lua" );	-- int 64
 
 
         b = i64_and( g_pieceb[1+g_ROOK] , cb );
-        while ( i64_ne( b, g_0 ) ) do
+        while ( i64_nz( b ) ) do
 
           f = getg_LSB(b);
           b = i64_xor( b, g_BITi[1+f] );
@@ -2297,7 +2302,7 @@ dofile( "i64.lua" );	-- int 64
 
 
         b = i64_and( g_pieceb[1+g_QUEEN] , cb );
-        while ( i64_ne( b, g_0 ) ) do
+        while ( i64_nz( b ) ) do
 
           f = getg_LSB(b);
           b = i64_xor( b, g_BITi[1+f] );
@@ -2308,7 +2313,7 @@ dofile( "i64.lua" );	-- int 64
         b = i64_or( i64_or( g_pieceb[1+g_ROOK], g_pieceb[1+g_BISHOP] ), g_pieceb[1+g_QUEEN] );
         b = i64_and( pin, b );
 
-        while ( i64_ne( b, g_0 ) ) do
+        while ( i64_nz( b ) ) do
 
           f = getg_LSB(b);
           b = i64_xor( b, g_BITi[1+f] );
@@ -2371,32 +2376,32 @@ dofile( "i64.lua" );	-- int 64
 
         attacks = i64_and( attacks, BOARD() );
 
-        while ( i64_ne( attacks, g_0 ) ) do
+        while ( i64_nz( attacks ) ) do
 
           b1=i64_and( g_colorb[1+c] , attacks );
 
           temp = i64_and( g_pieceb[1+g_PAWN], b1 );
-          if (i64_ne( temp, g_0 )) then
+          if (i64_nz( temp )) then
             piece = g_PAWN;
           else
             temp = i64_and( g_pieceb[1+g_KNIGHT], b1 );
-            if (i64_ne( temp, g_0 )) then
+            if (i64_nz( temp )) then
               piece = g_KNIGHT;
             else
               temp = i64_and( g_pieceb[1+g_BISHOP], b1 );
-              if (i64_ne( temp, g_0 )) then
+              if (i64_nz( temp )) then
                 piece = g_BISHOP;
               else
                 temp = i64_and( g_pieceb[1+g_ROOK], b1 );
-                if (i64_ne( temp, g_0 )) then
+                if (i64_nz( temp )) then
                   piece = g_ROOK;
                 else
                   temp = i64_and( g_pieceb[1+g_QUEEN], b1 );
-                  if (i64_ne( temp, g_0 )) then
+                  if (i64_nz( temp )) then
                     piece = g_QUEEN;
                   else
                     temp = i64_and( g_pieceb[1+g_KING], b1 );
-                    if (i64_ne( temp, g_0 )) then
+                    if (i64_nz( temp )) then
                       piece = g_KING;
                     else
                       break;
@@ -2410,7 +2415,7 @@ dofile( "i64.lua" );	-- int 64
           temp = i64_and( temp, i64_neg( temp ) );
 
           g_colorb[1+c] = i64_xor( g_colorb[1+c], temp );
-		
+
           if ((bit.band(piece,4) ~= 0)  or  (piece == 1)) then
 
             if (bit.band(piece,1) ~= 0) then
@@ -2532,7 +2537,7 @@ dofile( "i64.lua" );	-- int 64
         local w=i64(0);
 
         b = i64_and( g_pieceb[1+g_PAWN] , g_colorb[1+c] );
-        while ( i64_ne( b, g_0 ) ) do
+        while ( i64_nz( b ) ) do
 
           ppos = 0;
           f = getg_LSB(b);
@@ -2543,12 +2548,12 @@ dofile( "i64.lua" );	-- int 64
           a = POCC(f, c)
 
           w = i64_and(a , kn);
-          if (i64_ne( w, g_0)) then
+          if (i64_nz( w )) then
             katt = katt + bit.lshift( g_BITCnt(w) , 4 );
           end
 
           w = i64_and(g_BITi[1+f] , pin);
-          if (i64_ne( w, g_0)) then
+          if (i64_nz( w )) then
             if ( bit.band(getDir(f, g_kingpos[1+c]) , 16) == 0) then
               m = i64(0);
             end
@@ -2561,16 +2566,16 @@ dofile( "i64.lua" );	-- int 64
           ppos = ppos + iif( m ~= 0, 8, -8 );
 
           w = i64_and( i64_and(g_pawnfile[1+c][1+f] , g_pieceb[1+g_PAWN]), ocb );
-          if(i64_eq(w, g_0)) then
+          if (i64_is0( w )) then
 
                   --Free file?
             w = i64_and( i64_and(g_pawnfree[1+c][1+f] , g_pieceb[1+g_PAWN]), ocb );
-            if (i64_eq(w, g_0)) then
+            if (i64_is0( w )) then
               --Free run?
               ppos = (ppos+ppos);
             end
             w = i64_and( i64_and(g_pawnhelp[1+c][1+f] , g_pieceb[1+g_PAWN]), g_colorb[1+c] );
-            if (i64_eq(w, g_0)) then
+            if (i64_is0( w )) then
               --Hanging backpawn?
               ppos = (ppos-33);
             end
@@ -2582,7 +2587,7 @@ dofile( "i64.lua" );	-- int 64
 
         cb = i64_and( g_colorb[1+c] , npin );
         b = i64_and( g_pieceb[1+g_KNIGHT] , cb );
-        while (i64_ne( b, g_0 )) do
+        while (i64_nz( b )) do
 
           sf[1+0] = sf[1+0]+1;
           f = getg_LSB(b);
@@ -2590,7 +2595,7 @@ dofile( "i64.lua" );	-- int 64
           a = g_nmoves[1+f];
 
           w = i64_and(a , kn);
-          if (i64_ne( w, g_0)) then
+          if (i64_nz( w )) then
             katt = katt + bit.lshift( g_BITCnt(w) , 4 );
           end
 
@@ -2600,7 +2605,7 @@ dofile( "i64.lua" );	-- int 64
 
         b = i64_and( g_pieceb[1+g_KNIGHT] , pin );
 
-        while ( i64_ne( b, g_0 ) ) do
+        while ( i64_nz( b ) ) do
 
           sf[1+0] = sf[1+0]+1;
           f = getg_LSB(b);
@@ -2608,7 +2613,7 @@ dofile( "i64.lua" );	-- int 64
           a = g_nmoves[1+f];
 
           w = i64_and(a , kn);
-          if (i64_ne( w, g_0)) then
+          if (i64_nz( w )) then
             katt = katt + bit.lshift( g_BITCnt(w) , 4 );
           end
 
@@ -2618,7 +2623,7 @@ dofile( "i64.lua" );	-- int 64
         g_colorb[1+oc] = i64_xor( g_colorb[1+oc], g_BITi[1+g_kingpos[1+oc]] );
         b = i64_and( g_pieceb[1+g_QUEEN] , cb );
 
-        while ( i64_ne( b, g_0 ) ) do
+        while ( i64_nz( b ) ) do
 
           sf[1+0] = sf[1+0]+4;
           f = getg_LSB(b);
@@ -2627,7 +2632,7 @@ dofile( "i64.lua" );	-- int 64
           a = i64_or( a, i64_or( BATT3(f) , BATT4(f) ) );
 
           w = i64_and(a , kn);
-          if (i64_ne( w, g_0)) then
+          if (i64_nz( w )) then
             katt = katt + bit.lshift( g_BITCnt(w) , 4 );
           end
 
@@ -2640,7 +2645,7 @@ dofile( "i64.lua" );	-- int 64
 
         b = i64_and( g_pieceb[1+g_BISHOP] , cb );
 
-        while ( i64_ne( b, g_0 ) ) do
+        while ( i64_nz( b ) ) do
 
           sf[1+0] = sf[1+0]+1;
           f = getg_LSB(b);
@@ -2648,7 +2653,7 @@ dofile( "i64.lua" );	-- int 64
           a = i64_or( BATT3(f) , BATT4(f) );
 
           w = i64_and(a , kn);
-          if (i64_ne( w, g_0)) then
+          if (i64_nz( w )) then
             katt = katt + bit.lshift( g_BITCnt(w) , 4 );
           end
 
@@ -2665,7 +2670,7 @@ dofile( "i64.lua" );	-- int 64
 
         b = i64_and( g_pieceb[1+g_ROOK] , cb );
 
-        while ( i64_ne( b, g_0 ) ) do
+        while ( i64_nz( b ) ) do
 
           sf[1+0] = sf[1+0]+2;
           f = getg_LSB(b);
@@ -2673,7 +2678,7 @@ dofile( "i64.lua" );	-- int 64
           a = i64_or( RATT1(f) , RATT2(f) );
 
           w = i64_and(a , kn);
-          if (i64_ne( w, g_0)) then
+          if (i64_nz( w )) then
             katt = katt + bit.lshift( g_BITCnt(w) , 4 );
           end
 
@@ -2687,7 +2692,7 @@ dofile( "i64.lua" );	-- int 64
         b = i64_or( i64_or( g_pieceb[1+g_ROOK] , g_pieceb[1+g_BISHOP] ), g_pieceb[1+g_QUEEN] );
         b = i64_and( pin , b);
 
-        while ( i64_ne( b, g_0 ) ) do
+        while ( i64_nz( b ) ) do
 
           f = getg_LSB(b);
           b = i64_xor( b, g_BITi[1+f] );
@@ -2698,7 +2703,7 @@ dofile( "i64.lua" );	-- int 64
             a = i64_or( BATT3(f) , BATT4(f) );
 
             w = i64_and(a , kn);
-            if (i64_ne( w, g_0)) then
+            if (i64_nz( w )) then
               katt = katt + bit.lshift( g_BITCnt(w) , 4 );
             end
 
@@ -2709,7 +2714,7 @@ dofile( "i64.lua" );	-- int 64
               a = i64_or( RATT1(f) , RATT2(f) );
 
               w = i64_and(a , kn);
-              if (i64_ne( w, g_0)) then
+              if (i64_nz( w )) then
                 katt = katt + bit.lshift( g_BITCnt(w) , 4 );
               end
 
@@ -2720,7 +2725,7 @@ dofile( "i64.lua" );	-- int 64
               a = i64_or( a, i64_or( BATT3(f) , BATT4(f) ) );
 
               w = i64_and(a , kn);
-              if (i64_ne( w, g_0)) then
+              if (i64_nz( w )) then
                 katt = katt + bit.lshift( g_BITCnt(w) , 4 );
               end
 
@@ -2751,7 +2756,7 @@ dofile( "i64.lua" );	-- int 64
         g_colorb[1+oc] = i64_xor( g_colorb[1+oc], g_BITi[1+g_kingpos[1+oc]] );
 
         w = i64_and(g_pieceb[1+g_PAWN] , g_colorb[1+c]);
-        if ((sf[1+0] == 1)  and i64_eq( w, g_0)) then
+        if ((sf[1+0] == 1)  and i64_is0( w )) then
           --No mating material:
           mn =- 200;
         end
@@ -2813,8 +2818,8 @@ dofile( "i64.lua" );	-- int 64
             g_sabort = true;
           end
         end
-	
-        if (i64_eq(ch,g_0)) then
+
+        if (i64_is0( ch )) then
 
           if (cmat - 200 >= beta) then
             return beta
@@ -2835,7 +2840,7 @@ dofile( "i64.lua" );	-- int 64
 
         generateCaps(ch, c, ply);
 
-        if (i64_ne(ch,g_0)  and  (g_movenum[1+ply] == 0)) then
+        if (i64_nz( ch )  and  (g_movenum[1+ply] == 0)) then
           return (-32000 + ply);
         end
 
@@ -2846,8 +2851,8 @@ dofile( "i64.lua" );	-- int 64
 
          m = qpick(g_movelist[1+ply], g_movenum[1+ply], i);
 
-        
-         cont = (i64_eq(ch,g_0) and  (PROM(m) == 0)  and  (g_pval[1+PIECE(m)] > g_pval[1+CAP(m)])  and  (swap(m) < 0));
+
+         cont = (i64_is0( ch ) and  (PROM(m) == 0)  and  (g_pval[1+PIECE(m)] > g_pval[1+CAP(m)])  and  (swap(m) < 0));
 
          if(not cont) then
 
@@ -2959,7 +2964,7 @@ dofile( "i64.lua" );	-- int 64
         local cont = false;
 
         g_pvlength[1+ply] = ply;
-	
+
         if (ply >= g_sd or g_sabort) then
           return (eval0(c) + iif(c ~= 0, -g_mat_, g_mat_));
         end
@@ -2971,7 +2976,7 @@ dofile( "i64.lua" );	-- int 64
             g_sabort = true;
           end
         end
-	
+
         hp = HASHP(c);
         if ((ply ~= 0)  and  (ig_sdraw(hp, 1) ~= 0)) then
           return 0;
@@ -2986,7 +2991,7 @@ dofile( "i64.lua" );	-- int 64
 
         v = bit.band(hb.l, g_HMASKB);
         he = g_hashDB[1+v];
-        if ((he~=nil) and i64_eq( i64_and(i64_xor(he,hb), g_HINVB), g_0 )) then
+        if ((he~=nil) and i64_is0( i64_and(i64_xor(he,hb), g_HINVB) )) then
 
           g_hc = g_hc + 1;
           w = LOW16(he.l) - 32768;
@@ -3012,7 +3017,7 @@ dofile( "i64.lua" );	-- int 64
         b1 = i64_and( g_colorb[1+c], i64_not( g_pieceb[1+g_PAWN] ) );
         b1 = i64_and( b1, i64_not( pinnedPieces(g_kingpos[1+c], c1) ) );
 
-        if ((pvnode == 0)  and  i64_eq(ch,g_0)  and  (isNone ~= 0)  and  (d > 1)  and (g_BITCnt(b1) > 2) ) then
+        if ((pvnode == 0)  and  i64_is0( ch )  and  (isNone ~= 0)  and  (d > 1)  and (g_BITCnt(b1) > 2) ) then
 
           g_flagstore = g_flags;
           R = math.floor( (10 + d + g_Nonevariance(w - beta))/4 );
@@ -3040,7 +3045,7 @@ dofile( "i64.lua" );	-- int 64
         if (ply > 0) then
           v = bit.band(hp.l, g_HMASKP);
           he = g_hashDP[1+v];
-          if ((he~=nil) and i64_eq( i64_and(i64_xor(he,hp), g_HINVP) , g_0) ) then
+          if ((he~=nil) and i64_is0( i64_and(i64_xor(he,hp), g_HINVP) ) ) then
             hsave = bit.band(he.l, g_HMASKP);
             hmove = hsave;
           end
@@ -3051,7 +3056,7 @@ dofile( "i64.lua" );	-- int 64
             w = search(ch, c, d-3, ply, alpha, beta, pvnode, 0);
             v = bit.band(hp.l, g_HMASKP);
             he = g_hashDP[1+v];
-            if ((he~=nil) and i64_eq( i64_and(i64_xor(he,hp), g_HINVP) , g_0) ) then
+            if ((he~=nil) and i64_is0( i64_and(i64_xor(he,hp), g_HINVP) ) ) then
               hsave = bit.band(he.l, g_HMASKP);
               hmove = hsave;
             end
@@ -3085,7 +3090,7 @@ dofile( "i64.lua" );	-- int 64
               generateMoves(ch, c, ply);
               n = g_movenum[1+ply];
               if (n == 0) then
-                return iif( i64_ne(ch,g_0), -32000+ply, 0 );
+                return iif( i64_nz( ch ), -32000+ply, 0 );
               end
             end
 
@@ -3101,7 +3106,7 @@ dofile( "i64.lua" );	-- int 64
 
           nch = attacked(g_kingpos[1+c1], c1);
           -- Check Extension:
-          if ( i64_ne(nch,g_0) ) then
+          if ( i64_nz( nch ) ) then
             ext = ext+1;
 
           else
@@ -3112,7 +3117,7 @@ dofile( "i64.lua" );	-- int 64
 
                 b1 = i64_and( g_pawnfree[1+c][1+TO(m)], g_pieceb[1+g_PAWN] );
                 b1 = i64_and( b1, g_colorb[1+c1] );
-                if ((PIECE(m) ~= g_PAWN)  or i64_ne(b1,g_0)) then
+                if ((PIECE(m) ~= g_PAWN)  or i64_nz( b1 )) then
                   ext = ext-1;
                 end
               end
@@ -3239,9 +3244,7 @@ dofile( "i64.lua" );	-- int 64
         end
 
         c = ig_sdraw(HASHP(c), 2);
-	-- Lets ignore repeats and play till checkmate
-	c = 0;
-	
+
         if( c==1 ) then
           g_gameover = "1/2-1/2 Draw by Repetition";
         else
@@ -3451,7 +3454,7 @@ dofile( "i64.lua" );	-- int 64
         g_nds = 0;
         g_hc = 0;
         g_gameover = "";
-	
+
 	-- we simply set search time
         g_movemade = "";
 
@@ -3465,7 +3468,7 @@ dofile( "i64.lua" );	-- int 64
           if (g_sabort) then
              break;
           end
-	  
+
           if ((g_post_)  and  (g_pvlength[1+0] > 0)) then
             t1 = (os.clock() - g_starttime);
             s = string.format("%d",g_iter)..". ";
@@ -3695,13 +3698,13 @@ dofile( "i64.lua" );	-- int 64
         while(true) do
           g_ex = calc();
           printboard();
-	  
+
           local mr = COUNT(); -- just export to pgn-viewer
           if(mr%2>0) then
             g_pgn = g_pgn..string.format( "%d",math.floor(mr/2)+1 )..".";
           end
           g_pgn = g_pgn..mvstr( g_p_v[1+0][1+0], true ).." ";
-	   
+
           if( g_ex ~= 0 ) then
 	    if(string.find(g_gameover,"mates")~=nil) then
 		g_pgn = g_pgn.."#"
@@ -3721,7 +3724,8 @@ dofile( "i64.lua" );	-- int 64
 
       woutput( g_VER );
       init();
-
+      
       printboard();
-	   
+
       autogame();
+
