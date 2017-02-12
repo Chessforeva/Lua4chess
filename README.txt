@@ -17,9 +17,10 @@ This is a small sample of Lua based chess to run from command line.
 
 6. LuaJester.bat - Very good chess program for 32-bits, and fast. Almost best what lua can perform.
 
-7. JesterPureLua.bat - the same Jester without BitOp requirement,
-   bitwises are little bit slower but working based on pure Lua scripts.
-
+7. OwlChess.bat - a port of an old '92-95 Owl Chess program
+ in Borland Turbo C (from javascript port). Good and well documented.
+ It was written when no 64 bits seemed useful. :)
+ This version sometimes crashes on LuaJIT.
 
 Other:
 ---------
@@ -33,4 +34,10 @@ Other:
 Also lua to loadfile:
 ---------------------
 i64.lua - emulated 64bit variables to get working (1<<63)
+
+noBitOp.lua -  can be used instead of BitOp (but slower)
+
 c0_chess_subroutine.lua - chess logic, not a fastest code
+
+
+Updated 2017.feb.

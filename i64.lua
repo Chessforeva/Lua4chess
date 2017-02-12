@@ -14,7 +14,7 @@ end -- +assign 64-bit v.as 2 regs
 -- unsigned [0..0xFFFFFFFF]
 function i64u(x)
  return bit.band( ( bit.lshift(bit.rshift(x,1),1) + bit.band(x,1) ), 0xFFFFFFFF);
-end 
+end
 
 function i64_clone(x)
  local o = {}; o.l = x.l; o.h = x.h; return o;
@@ -72,7 +72,7 @@ function i64_inc(a)
    o.h = i64u(a.h+1);
  else
    o.h = i64u(a.h);
- end  
+ end
  return o;
 end
 

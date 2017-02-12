@@ -1,0 +1,2 @@
+luajit OwlChess.lua
+pause

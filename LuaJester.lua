@@ -1,5 +1,12 @@
-
+-- BitOp
 require "bit"
+
+
+-- Or an alternative is bitwises emulation.
+-- This loads and executes other .lua file
+-- (substitutes "bit" object)
+-- loadfile("noBitOp.lua");
+
 
 	-- This is a Lua version of
 	-- Jester (http://www.ludochess.com/) - a strong java chess engine
@@ -296,6 +303,7 @@ require "bit"
 	 Js_WEBSITE = "http://www.ludochess.com/";
 	 Js_STR_COPY = "JESTER 1.10e by "..Js_AUTHOR..Js_WEBSITE;
 
+	 Js_pgn = ""; -- save too
 
 	-- Some helping functions for Lua scripting
 
@@ -405,12 +413,13 @@ require "bit"
 	      ((IColmn(Js_pieceMap[1+Js_white][1+0]) > 4) and (IColmn(Js_pieceMap[1+Js_black][1+0]) < 3));
 	  end
 
+	  -- deep copy
 	  BoardCpy(Js_knight_pos, Js_knightMvt[1+Js_white]);
 	  BoardCpy(Js_knight_pos, Js_knightMvt[1+Js_black]);
 	  BoardCpy(Js_bishop_pos, Js_bishopMvt[1+Js_white]);
 	  BoardCpy(Js_bishop_pos, Js_bishopMvt[1+Js_black]);
 
-	  --slice is much faster, but lua has not such array method
+	  --slice is much faster, but copies references only
 	  --Js_knightMvt[1+Js_white] = Js_knight_pos.slice();
 	  --Js_knightMvt[1+Js_black] = Js_knight_pos.slice();
 	  --Js_bishopMvt[1+Js_white] = Js_bishop_pos.slice();
@@ -484,6 +493,7 @@ require "bit"
 	    end
 
 	    -- put in locals
+
 	    nwm = Js_knightMvt[1+Js_white][1+sq];
 	    nbm = Js_knightMvt[1+Js_black][1+sq];
 	    bwm = Js_bishopMvt[1+Js_white][1+sq];
@@ -604,8 +614,10 @@ require "bit"
 
 	    if (Pd ~= 0) then
 	      val = Pd * Js_working2 / 10;
-	      Js_kingMvt[1+Js_white][1+sq] = Js_kingMvt[1+Js_white][1+sq] - val;
-	      Js_kingMvt[1+Js_black][1+sq] = Js_kingMvt[1+Js_black][1+sq] - val;
+		  local qw = Js_kingMvt[1+Js_white];
+	      qw[1+sq] = qw[1+sq] - val;
+		  local qb = Js_kingMvt[1+Js_black];
+	      qb[1+sq] = qb[1+sq] - val;
 	    end
 
 	  end
@@ -760,7 +772,7 @@ require "bit"
 	function ISqAgrs(sq,side)
 
 	  local xside = Js_otherTroop[1+side];
-	  local idir = (Js_pieceTyp[1+xside][1+Js_pawn] * 64 * 64) + (sq * 64);
+	  local idir = (Js_pieceTyp[1+xside][1+Js_pawn] * 4096) + (sq * 64);
 	  local u = Js_nextArrow[1+(idir + sq)];
 	  local ipos = 0;
 
@@ -777,7 +789,7 @@ require "bit"
 	    return 1;
 	  end
 
-	  ipos = (Js_bishop * 64 * 64) + (sq * 64);
+	  ipos = (Js_bishop * 4096) + (sq * 64);
 	  idir = ipos;
 
 	  u = Js_nextCross[1+(ipos + sq)];
@@ -795,7 +807,7 @@ require "bit"
 	    end
 	  until (u == sq);
 
-	  ipos = (Js_rook * 64 * 64) + (sq * 64);
+	  ipos = (Js_rook * 4096) + (sq * 64);
 	  idir = ipos;
 
 	  u = Js_nextCross[1+(ipos + sq)];
@@ -812,7 +824,7 @@ require "bit"
 	    end
 	  until (u == sq);
 
-	  idir = (Js_knight * 64 * 64) + (sq * 64);
+	  idir = (Js_knight * 4096) + (sq * 64);
 
 	  u = Js_nextArrow[1+(idir + sq)];
 	  repeat
@@ -826,7 +838,7 @@ require "bit"
 
 	function Iwxy(a,b)
 
-	  return bt.bor( bit.lshift(a,3), b );
+	  return bit.bor( bit.lshift(a,3), b );
 	end
 
 	function XRayBR(sq, s, mob)
@@ -834,7 +846,7 @@ require "bit"
 	  local Kf = Js_killArea[1+Js_c1];
 	  local piece = Js_board[1+sq];
 
-	  local ipos = (piece * 64 * 64) + (sq * 64);
+	  local ipos = (piece * 4096) + (sq * 64);
 	  local idir = ipos;
 
 	  local u = Js_nextCross[1+(ipos + sq)];
@@ -934,7 +946,7 @@ require "bit"
 
 	    p0 = 0;
 	    while(p0<64) do
-	        i = (ptyp * 64 * 64) + (po * 64) + p0;
+	        i = (ptyp * 4096) + (po * 64) + p0;
 	        Js_nextCross[1+i] = po;	--(char)
 	        Js_nextArrow[1+i] = po;	--(char)
 	        p0 = p0 + 1;
@@ -955,7 +967,7 @@ require "bit"
 	    if (Js_virtualBoard[1+po] >= 0) then
 
 
-	      ipos = (ptyp * 64 * 64) + (Js_virtualBoard[1+po] * 64);
+	      ipos = (ptyp * 4096) + (Js_virtualBoard[1+po] * 64);
 	      idir = ipos;
 
 	      di = 0;
@@ -1114,7 +1126,7 @@ require "bit"
 	  if (Js_myPiece == "K") then
 
 	    mv22 = string.sub(mv2, 1, 5);
- 
+
 	    if ((mv22=="e1-g1") or (mv22=="e8-g8")) then
 	      fKcastle = true;
 	    end
@@ -1134,15 +1146,23 @@ require "bit"
 	  else
 	    szM = szM..Js_myPiece..mv2;
 	  end
-	  szM = szM.." ";
+
+	  szM = szM.."  ";
+	  szM = string.sub(szM, 1, string.find(szM,"  "));
+
 
 	  if (Js_fAbandon) then
 	    szM = "resign";
+	  else
+		Js_pgn = Js_pgn .. szM;
 	  end
+
 	  Js_myPiece = "";
 	  MessageOut(szM, Js_flip);
 
 	  Js_flip = (not Js_flip);
+
+
 	end
 
 	function CheckMov(s, iop)
@@ -1272,7 +1292,7 @@ require "bit"
 	function FJunk(sq)
 
 	  local piece = Js_board[1+sq];
-	  local ipos = (Js_pieceTyp[1+Js_c1][1+piece] * 64 * 64) + (sq * 64);
+	  local ipos = (Js_pieceTyp[1+Js_c1][1+piece] * 4096) + (sq * 64);
 	  local idir = ipos;
 	  local u = Js_nextCross[1+(ipos + sq)];
 
@@ -1565,6 +1585,8 @@ require "bit"
 
 	  InitStatus();
 
+	  Js_pgn = "";
+
 	end
 
 
@@ -1609,6 +1631,13 @@ require "bit"
 	    end
 	  end
 
+	  if (Js_fMate_kc or Js_fAbandon) then
+	     sz = sz.." "..iif( Js_flip, "1-0", "0-1");
+	  end
+	  if (Js_bDraw>0 or Js_fStalemate) then
+	     sz = sz.." 1/2-1/2";
+	  end
+
 	  if ((not Js_fMate_kc) and (Js_bDraw == 0) and (not Js_fStalemate) and (not Js_fAbandon)) then
 	    return;
 	  end
@@ -1618,6 +1647,7 @@ require "bit"
 
 	  if( string.len(sz)>0) then
 	    MessageOut(sz,true);
+	    Js_pgn = Js_pgn .. "{" .. sz .. "}";
 	  end
 	end
 
@@ -1790,7 +1820,7 @@ require "bit"
 
 	    if (Js_heavy[1+piece] ~= false) then
 
-	      ipos = (piece * 64 * 64) + (sq * 64);
+	      ipos = (piece * 4096) + (sq * 64);
 	      idir = ipos;
 
 	      u = Js_nextCross[1+(ipos + sq)];
@@ -1810,7 +1840,7 @@ require "bit"
 
 	    else
 
-	      idir = (Js_pieceTyp[1+side][1+piece] * 64 * 64) + (sq * 64);
+	      idir = (Js_pieceTyp[1+side][1+piece] * 4096) + (sq * 64);
 
 	      u = Js_nextArrow[1+(idir + sq)];
 	      repeat
@@ -2286,7 +2316,7 @@ require "bit"
 
 	  local piece = Js_board[1+sq];
 
-	  local i = (Js_pieceTyp[1+side][1+piece] * 64 * 64) + (sq * 64);
+	  local i = (Js_pieceTyp[1+side][1+piece] * 4096) + (sq * 64);
 	  local ipos = i;
 	  local idir = i;
 	  local u = Js_nextCross[1+(ipos + sq)];
@@ -2344,7 +2374,7 @@ require "bit"
 
 	  if ((Js_withBishop[1+Js_c2] ~= 0) or (Js_withQueen[1+Js_c2] ~= 0)) then
 
-	    ipos = (Js_bishop * 64 * 64) + (sq * 64);
+	    ipos = (Js_bishop * 4096) + (sq * 64);
 	    idir = ipos;
 
 	    u = Js_nextCross[1+(ipos + sq)];
@@ -2367,7 +2397,7 @@ require "bit"
 
 	  if ((Js_withRook[1+Js_c2] ~= 0) or (Js_withQueen[1+Js_c2] ~= 0)) then
 
-	    ipos = (Js_rook * 64 * 64) + (sq * 64);
+	    ipos = (Js_rook * 4096) + (sq * 64);
 	    idir = ipos;
 
 	    u = Js_nextCross[1+(ipos + sq)];
@@ -2390,7 +2420,7 @@ require "bit"
 
 	  if (Js_withKnight[1+Js_c2] ~= 0) then
 
-	    idir = (Js_knight * 64 * 64) + (sq * 64);
+	    idir = (Js_knight * 4096) + (sq * 64);
 
 	    u = Js_nextArrow[1+(idir + sq)];
 	    repeat
@@ -2410,7 +2440,7 @@ require "bit"
 
 	  cnt = 0;
 
-	  idir = (Js_king * 64 * 64) + (sq * 64);
+	  idir = (Js_king * 4096) + (sq * 64);
 
 	  u = Js_nextCross[1+(idir + sq)];
 	  repeat
@@ -2565,87 +2595,91 @@ require "bit"
 	  local m3p = 0;
 
 	  if (f ~= t) then
+	    local a0 = Js_asciiMove[1+0];
+	    local a1 = Js_asciiMove[1+1];
+	    local a2 = Js_asciiMove[1+2];
+	    local a3 = Js_asciiMove[1+3];
+	    a0[1+0] = (97 + IColmn(f));		--(char)
+	    a0[1+1] = (49 + IRaw(f));		--(char)
+	    a0[1+2] = (97 + IColmn(t));		--(char)
+	    a0[1+3] = (49 + IRaw(t));		--(char)
+	    a0[1+4] = 0;
 
-	    Js_asciiMove[1+0][1+0] = (97 + IColmn(f));		--(char)
-	    Js_asciiMove[1+0][1+1] = (49 + IRaw(f));		--(char)
-	    Js_asciiMove[1+0][1+2] = (97 + IColmn(t));		--(char)
-	    Js_asciiMove[1+0][1+3] = (49 + IRaw(t));		--(char)
-	    Js_asciiMove[1+0][1+4] = 0;
-	    Js_asciiMove[1+3][1+0] = 0;
-	    Js_asciiMove[1+1][1+0] = Js_upperNot[1+Js_board[1+f]];
+	    a3[1+0] = 0;
+	    a1[1+0] = Js_upperNot[1+Js_board[1+f]];
 
-	    if (Js_asciiMove[1+1][1+0] == "P") then
+	    if (a1[1+0] == "P") then
 
-	      if (Js_asciiMove[1+0][1+0] == Js_asciiMove[1+0][1+2]) then
-	        Js_asciiMove[1+1][1+0] = Js_asciiMove[1+0][1+2];
-	        Js_asciiMove[1+2][1+0] = Js_asciiMove[1+1][1+0];
-		Js_asciiMove[1+1][1+1] = Js_asciiMove[1+0][1+3];
-	        Js_asciiMove[1+2][1+1] = Js_asciiMove[1+1][1+1];
+	      if (a0[1+0] == a0[1+2]) then
+	        a1[1+0] = a0[1+2];
+	        a2[1+0] = a1[1+0];
+			a1[1+1] = a0[1+3];
+	        a2[1+1] = a1[1+1];
 	        m3p = 2;
 	      else
-		Js_asciiMove[1+1][1+0] = Js_asciiMove[1+0][1+0];
-	        Js_asciiMove[1+2][1+0] = Js_asciiMove[1+1][1+0];
-		Js_asciiMove[1+1][1+1] = Js_asciiMove[1+0][1+2];
-	        Js_asciiMove[1+2][1+1] = Js_asciiMove[1+1][1+1];
-	        Js_asciiMove[1+2][1+2] = Js_asciiMove[1+0][1+3];
+			a1[1+0] = a0[1+0];
+	        a2[1+0] = a1[1+0];
+			a1[1+1] = a0[1+2];
+	        a2[1+1] = a1[1+1];
+	        a2[1+2] = a0[1+3];
 	        m3p = 3;
 	      end
 
-	      Js_asciiMove[1+1][1+2] = 0;
-	      Js_asciiMove[1+2][1+m3p] = 0;
+	      a1[1+2] = 0;
+	      a2[1+m3p] = 0;
 	      if (bit.band(flag, Js_promote) ~= 0) then
-		Js_asciiMove[1+1][1+2] = Js_lowerNot[1+bit.band(flag, Js_pawn_msk)];
-		Js_asciiMove[1+2][1+m3p] = Js_asciiMove[1+1][1+2];
-	        Js_asciiMove[1+0][1+4] = Js_asciiMove[1+1][1+2];
-		Js_asciiMove[1+0][1+5] = 0;
-		Js_asciiMove[1+2][1+(m3p + 1)] = 0;
-	        Js_asciiMove[1+1][1+3] = 0;
+			a1[1+2] = Js_lowerNot[1+bit.band(flag, Js_pawn_msk)];
+			a2[1+m3p] = a1[1+2];
+	        a0[1+4] = a1[1+2];
+			a0[1+5] = 0;
+			a2[1+(m3p + 1)] = 0;
+	        a1[1+3] = 0;
 	      end
 
 	    else
 
-	      Js_asciiMove[1+2][1+0] = Js_asciiMove[1+1][1+0];
-	      Js_asciiMove[1+2][1+1] = Js_asciiMove[1+0][1+1];
-	      Js_asciiMove[1+1][1+1] = Js_asciiMove[1+0][1+2];
-	      Js_asciiMove[1+2][1+2] = Js_asciiMove[1+1][1+1];
-	      Js_asciiMove[1+1][1+2] = Js_asciiMove[1+0][1+3];
-	      Js_asciiMove[1+2][1+3] = Js_asciiMove[1+1][1+2];
-	      Js_asciiMove[1+1][1+3] = 0;
-	      Js_asciiMove[1+2][1+4] = 0;
+	      a2[1+0] = a1[1+0];
+	      a2[1+1] = a0[1+1];
+	      a1[1+1] = a0[1+2];
+	      a2[1+2] = a1[1+1];
+	      a1[1+2] = a0[1+3];
+	      a2[1+3] = a1[1+2];
+	      a1[1+3] = 0;
+	      a2[1+4] = 0;
 	      for i=0,5,1 do
-	        Js_asciiMove[1+3][1+i] = Js_asciiMove[1+2][1+i];
+	        a3[1+i] = a2[1+i];
 	      end
 
-	      Js_asciiMove[1+3][1+1] = Js_asciiMove[1+0][1+0];
+	      a3[1+1] = a0[1+0];
 	      if (bit.band(flag , Js_castle_msk) ~= 0) then
 
 	        if (t > f) then
 
-	          Js_asciiMove[1+1][1+0] = 111;
-	          Js_asciiMove[1+1][1+1] = 45;
-	          Js_asciiMove[1+1][1+2] = 111;
-	          Js_asciiMove[1+1][1+3] = 0;
+	          a1[1+0] = 111;
+	          a1[1+1] = 45;
+	          a1[1+2] = 111;
+	          a1[1+3] = 0;
 
-	          Js_asciiMove[1+2][1+0] = 111;
-	          Js_asciiMove[1+2][1+1] = 45;
-	          Js_asciiMove[1+2][1+2] = 111;
-	          Js_asciiMove[1+2][1+3] = 0;
+	          a2[1+0] = 111;
+	          a2[1+1] = 45;
+	          a2[1+2] = 111;
+	          a2[1+3] = 0;
 
 	        else
 
-	          Js_asciiMove[1+1][1+0] = 111;
-	          Js_asciiMove[1+1][1+1] = 45;
-	          Js_asciiMove[1+1][1+2] = 111;
-	          Js_asciiMove[1+1][1+3] = 45;
-	          Js_asciiMove[1+1][1+4] = 111;
-	          Js_asciiMove[1+1][1+5] = 0;
+	          a1[1+0] = 111;
+	          a1[1+1] = 45;
+	          a1[1+2] = 111;
+	          a1[1+3] = 45;
+	          a1[1+4] = 111;
+	          a1[1+5] = 0;
 
-	          Js_asciiMove[1+2][1+0] = 111;
-	          Js_asciiMove[1+2][1+1] = 45;
-	          Js_asciiMove[1+2][1+2] = 111;
-	          Js_asciiMove[1+2][1+3] = 45;
-	          Js_asciiMove[1+2][1+4] = 111;
-	          Js_asciiMove[1+2][1+5] = 0;
+	          a2[1+0] = 111;
+	          a2[1+1] = 45;
+	          a2[1+2] = 111;
+	          a2[1+3] = 45;
+	          a2[1+4] = 111;
+	          a2[1+5] = 0;
 	        end
 	      end
 	    end
@@ -2687,6 +2721,7 @@ require "bit"
 	    BB[1+i] = {};	-- create object
 	  end
 
+
 	  for i=0,63,1 do
 	    iCol = i % 8;
 	    iLine = (i-iCol) / 8;
@@ -2698,6 +2733,7 @@ require "bit"
 	    BB[1+iLine][1+iCol] = ch;
 	  end
 
+	  print("");
 	  for iLine=7,0,-1 do
 	   s = "";
 	   for iCol=0,7,1 do
@@ -2734,7 +2770,7 @@ require "bit"
 
 	    if (Js_heavy[1+piece] ~= false) then
 
-	      ipos = (piece * 64 * 64) + (sq * 64);
+	      ipos = (piece * 4096) + (sq * 64);
 	      idir = ipos;
 
 	      u = Js_nextCross[1+(ipos + sq)];
@@ -2758,7 +2794,7 @@ require "bit"
 
 	    else
 
-	      idir = (Js_pieceTyp[1+side][1+piece] * 64 * 64) + (sq * 64);
+	      idir = (Js_pieceTyp[1+side][1+piece] * 4096) + (sq * 64);
 	      if ((piece == Js_pawn) and (IRaw(sq) == r7)) then
 
 	        fl = bit.bor( bit.bor(Js_capture, Js_promote) , Js_queen );
@@ -2787,7 +2823,7 @@ require "bit"
 	          Tpt1 = Tpt1 + 1;
 	        end
 
-	        ipos = (Js_pieceTyp[1+side][1+piece] * 64 * 64) + (sq * 64);
+	        ipos = (Js_pieceTyp[1+side][1+piece] * 4096) + (sq * 64);
 
 	        fl = bit.bor( Js_promote , Js_queen );
 
@@ -3463,11 +3499,11 @@ require "bit"
 
 	      UpdatePiecMap(tempc.i, t, 1);
 	      if (tempb.i == Js_pawn) then
+
 	        Js_pawnMap[1+tempc.i][1+ct] = Js_pawnMap[1+tempc.i][1+ct] - 1;
 	      end
 
 	      if (Js_board[1+f] == Js_pawn) then
-
 	        Js_pawnMap[1+side][1+cf] = Js_pawnMap[1+side][1+cf] - 1;
 	        Js_pawnMap[1+side][1+ct] = Js_pawnMap[1+side][1+ct] + 1;
 
@@ -4228,9 +4264,12 @@ require "bit"
 
 	-- automatic game
 	function autosample2()
+	 print("Thinking, autogame...");
 	 while((not Js_fGameOver) and (not Js_fAbandon) and (not Js_fMate_kc) and (not Js_fStalemate)) do
 	  Jst_Play();				-- next move
+	  print("nodes " .. Js_cCompNodes);	-- to see performance
 	 end
+	 print(Js_pgn);
 	end
 
 	-- undo cases

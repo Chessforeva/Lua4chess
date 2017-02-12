@@ -15460,6 +15460,7 @@ function autogame()
 
     if( not randomopening( mlist ) ) then
       do_input( "go movetime 15");
+      print("nodes: " .. SearchCurrent.node_nb);	-- to see performance
     end
 
     if(mc%2==0) then
