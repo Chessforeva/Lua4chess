@@ -384,7 +384,7 @@ end
 function FiftyMoveCnt()
 
     local cnt = 0;
-    while (RepeatMove(MovTab[1+mc - cnt])) do
+    while (cnt<=mc and RepeatMove(MovTab[1+mc - cnt])) do
         cnt = cnt + 1;
     end
     return cnt;
@@ -1917,7 +1917,7 @@ function LINETYPE()
 end
 
 -- slow "deepcopy"
-function copyMLine(a)
+function cloneMLine(a)
  local b = {};
  local i;
  for i=1, table.getn(a), 1 do
@@ -1925,6 +1925,15 @@ function copyMLine(a)
  end
  return b;
 end
+
+-- slow "deepcopy" of move arrays, t should be length of f
+function copyMLine(t,f)
+ local i;
+ for i=1, table.getn(f), 1 do
+  copyMove(t[i],f[i]);
+ end
+end
+
 
 function MLINE()
  local m = {};
@@ -2292,8 +2301,8 @@ end
 
 function updatebestline(P)
 
-    P.bestline.a = copyMLine( P.S.line.a );
-    P.bestline.a[1+Depth] = cloneMove( Mo );	-- copies to new MOVETYPE()
+    copyMLine( P.bestline.a, P.S.line.a );
+    copyMove( P.bestline.a[1+Depth], Mo );
 
 
     if(Depth==1) then
@@ -2319,9 +2328,9 @@ function loopbody(P)
     if(Depth < MAXPLY) then
 
         if(P.S.movgentype == mane) then
-            P.S.line.a = copyMLine( P.bestline.a );
+			copyMLine( P.S.line.a, P.bestline.a );
         end
-        P.S.line.a[1+Depth+1] = ZeroMove;
+        copyMove( P.S.line.a[1+Depth+1], ZeroMove );
     end
     --  principv indicates principal variation search
     --  Zerowindow indicates zero - width alpha - beta window
@@ -3087,7 +3096,7 @@ function CalcLibNo()
     LibNo = 0;
     if(mc <= UseLib) then
 
-        LibMTab = copyMLine(MovTab);
+        LibMTab = cloneMLine(MovTab);
         LibMc = mc;
         ResetGame();
         LibFound = false;
