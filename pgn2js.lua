@@ -1,4 +1,4 @@
-----------------------------------------------
+﻿----------------------------------------------
 --
 -- reads .pgn file and creates .js short version
 --
@@ -13,6 +13,7 @@ end
 dofile( "c0_chess_subroutine.lua" );	-- chess logic
 
 local CR =  string.char(13); -- string.char(10)
+
 
 -------- processes a .pgn file
 function encodefile( f )

@@ -12,7 +12,7 @@ This is a small sample of Lua based chess to run from command line.
 4. c0_chess.bat - a lua library for chess
 
 5. sargon.bat - Sargon assembler code of 80s ported to lua
-   history at http://chessprogramming.wikispaces.com/Dan+Spracklen
+   history at wikispaces chessprogramming about Dan Spracklen
    Just fast and simply positional. Not strong, improvable.
 
 6. LuaJester.bat - Very good chess program for 32-bits, and fast. Almost best what lua can perform.
@@ -29,7 +29,8 @@ Other:
 
 2. abkbase.bat - an Arena book reader sample
 
-
+3. pgn2js.bat - prepares pgn file to .js, see samples at
+	http://gitlab.com/chessforeva/pgn2js
 
 Also lua to loadfile:
 ---------------------
@@ -40,4 +41,4 @@ noBitOp.lua -  can be used instead of BitOp (but slower)
 c0_chess_subroutine.lua - chess logic, not a fastest code
 
 
-Updated 2017.feb.
+Updated 2021.jan.

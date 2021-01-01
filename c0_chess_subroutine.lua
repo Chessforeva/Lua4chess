@@ -1,4 +1,4 @@
--- Lua (www.lua.org) for chess logic with samples
+﻿-- Lua (www.lua.org) for chess logic with samples
 -- Board in variables, moves, FEN & PGN functions
 -- A ready code for free usage in any type of project
 -- no clock, no chess engine
@@ -7,12 +7,10 @@
 
 --
 
-
 -- This way the class c0_LuaChess is defined (similar)
 -- Can be substituted as needed (module,library,object,class,etc...)
 
 c0_LuaChess={}
-
 
 -- Global variables with initial settings
 -- Use OnInit if event needed to set values
