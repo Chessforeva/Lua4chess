@@ -50,6 +50,9 @@ c0_LuaChess.c0_PG_1 = ""
 
 c0_LuaChess.c0_PGN_header= {nil}
 
+c0_LuaChess.c0_PGN_short = true;
+c0_LuaChess.c0_PG_sh = "";
+
 c0_LuaChess.c0_errflag = false
 
 c0_LuaChess.PGN_text = ""
@@ -163,6 +166,11 @@ function c0_LuaChess.a_SAMPLES ( )
 	local PGN0="1.d4 d5 2.c4 e6 {comment goes here} 3.Nf3 Nf6 4.g3 Be7 (4.h4 or variant) 5.Bg2 0-0 6.0-0 dxc4 7.Qc2 a6 8.Qxc4 b5 9.Qc2 Bb7 10.Bd2 Be4 11.Qc1 Bb7 12.Qc2 Ra7 13.Rc1 Be4 14.Qb3 Bd5 15.Qe3 Nbd7 16.Ba5 Bd6 17.Nc3 Bb7 18.Ng5 Bxg2 19.Kxg2 Qa8+ 20.Qf3 Qxf3+ 21.Kxf3 e5 22.e3 Be7 23.Ne2 Re8 24.Kg2 Nd5 25.Nf3 Bd6 26.dxe5 Nxe5 27.Nxe5 Rxe5 28.Nd4 Ra8 29.Nc6 Re6 30.Rc2 Nb6 31.b3 Kf8 32.Rd1 Ke8 33.Nd4 Rf6 34.e4 Rg6 35.e5 Be7 36.Rxc7 Nd5 37.Rb7 Bd8 38.Nf5 Nf4+ 39.Kf3 Bxa5 40.gxf4 Bb4 41.Rdd7 Rc8 42.Rxf7 Rc3+ 43.Ke4 1-0"
 	local mlist0 = c0_LuaChess.c0_get_moves_from_PGN(PGN0)
     c0_LuaChess.printout (mlist0)
+	if c0_LuaChess.c0_PGN_short then
+		c0_LuaChess.printout ("shortlist:" .. c0_LuaChess.c0_PG_sh);
+		c0_LuaChess.c0_short2list();
+		c0_LuaChess.printout ("short->moves (reverse):" .. c0_LuaChess.c0_moveslist);
+	end
 
     c0_LuaChess.printout("moves -> PGN (reverse action)")
 	local PGN1=c0_LuaChess.c0_put_to_PGN(mlist0)
@@ -173,6 +181,13 @@ function c0_LuaChess.a_SAMPLES ( )
 	local PGN3="[White Aronian, Levon][Black Rosa, Mike][Result 0:1][SetUp 1][FEN bbrkqnrn/pppppppp/8/8/8/8/PPPPPPPP/BBRKQNRN w GCgc - 0 0] 1. c4 e5 2. Nhg3 Nhg6 3. b3 f6 4. e3 b6 5. Qe2 Ne6 6. Qh5 Rh8 7. Nf5 Ne7 8. Qxe8+ Kxe8 9. N1g3 h5 10. Nxe7 Kxe7 11. d4 d6 12. h4 Kf7 13. d5 Nf8 14. f4 c6 15. fxe5 dxe5 16. e4 Bd6 17. Bd3 Ng6 18. O-O Nxh4 19. Be2 Ng6 20. Nf5 Bc5+ 21. Kh2 Nf4 22. Rc2 cxd5 23. exd5 h4 24. Bg4 Rce8 25. Bb2 g6 26. Nd4 exd4 27.Rxf4 Bd6 0-1"
 	local mlist3= c0_LuaChess.c0_get_moves_from_PGN(PGN3)
     c0_LuaChess.printout (mlist3)
+	if c0_LuaChess.c0_PGN_short then
+		c0_LuaChess.printout ("shortlist:" .. c0_LuaChess.c0_PG_sh);
+		c0_LuaChess.c0_set_FEN (c0_LuaChess.c0_start_FEN)
+		c0_LuaChess.c0_set_start_position("");
+		c0_LuaChess.c0_short2list();
+		c0_LuaChess.printout ("short->moves (reverse):" .. c0_LuaChess.c0_moveslist);
+	end
 
     c0_LuaChess.printout("moves -> PGN (reverse action)")
     local PGN4=c0_LuaChess.c0_put_to_PGN(mlist3)
@@ -1422,7 +1437,7 @@ while (true) do
         urls=c0_LuaChess.Substr(urls,0,at2)
    end
 
-   str2=c0_LuaChess.Substr(str2,0,at) .. "<a href='" .. urls .. "' target='blank' >link»</a>" ..
+   str2=c0_LuaChess.Substr(str2,0,at) .. "<a href='" .. urls .. "' target='blank' >linkï¿½</a>" ..
         c0_LuaChess.SubstrAll(str2, at +string.len(urls))
   else
 
@@ -1498,9 +1513,11 @@ local AddInfo=""
 
 local htms=""
 
-local CR=( string.char(13) ..  string.char(10) )
+local CR=( string.char(13) ..  string.char(10) );
 
-c0_LuaChess.c0_PGN_header = ""
+c0_LuaChess.c0_PGN_header = "";
+
+c0_LuaChess.c0_PG_sh = "";
 
 c0_LuaChess.PGN_text = string.gsub( c0_LuaChess.PGN_text,"  ", " " )
 
@@ -1533,7 +1550,7 @@ while(true) do
 
  buf2= string.gsub( buf2,"'","" )
  buf2= string.gsub( buf2,string.char (34),"" )
- --buf2= string.gsub( buf2,"–","-" )
+ --buf2= string.gsub( buf2,"ï¿½","-" )
 
  local buf3=string.upper(buf2)
 
@@ -1996,6 +2013,10 @@ while(i<string.len(str)) do
 	else
         c0_LuaChess.c0_become_from_engine = "Q"
     end
+	
+	if(c0_LuaChess.c0_PGN_short) then
+		c0_LuaChess.c0_PG_sh = c0_LuaChess.c0_PG_sh .. c0_LuaChess.c0_shortCode(1,move2);
+	end
 
 	if(c0_LuaChess.c0_fischer) then
         c0_LuaChess.c0_fischer_cstl_move(move2,false)
@@ -3849,7 +3870,7 @@ if(string.len(c0_king)>0 and string.len(c0_rook)>0) then
 	if(c0_draw) then
 		c0_LuaChess.c0_clear_at(c0_LuaChess.Substr(c0_king,2,2))
 		c0_LuaChess.c0_clear_at(c0_LuaChess.Substr(c0_rook,2,2))
-		c0_LuaChess.c0_add_piece(c0_LuaChess.Substr(c0_king2,0,2)+c0_LuaChess.Substr(c0_rook2,2,2))
+		c0_LuaChess.c0_add_piece(c0_LuaChess.Substr(c0_king2,0,2)..c0_LuaChess.Substr(c0_rook2,2,2))
 		c0_LuaChess.c0_moveto(c0_LuaChess.c0_convH888(c0_LuaChess.Substr(c0_rook2,2,2)), c0_LuaChess.c0_convH888(c0_LuaChess.Substr(c0_king2,2,2)), c0_draw)
 		c0_LuaChess.c0_add_piece(c0_rook2)
 	else
@@ -3984,6 +4005,203 @@ end
 --
 end
 --
+
+
+----------------------------------------------------------------
+-- Short notation encoding (compression, internal only)
+----------------------------------------------------------------
+
+--------- Short notation move->code or code->move...
+function c0_LuaChess.c0_shortCode(ch7,P1)
+
+-- sorting position, avoid mistakes
+
+local V = 8;
+local H;
+local npos = "";
+local opos = c0_LuaChess.c0_position;
+
+ while V>0 do
+	H = 8;
+	while H>0 do
+		local E = c0_LuaChess.IndexOf( opos, c0_LuaChess.c0_convE2( V, H ) );
+		if(E>0) then
+			npos = c0_LuaChess.Substr(opos, E-2, 5 ) .. npos;
+			opos = c0_LuaChess.Substr(opos,0,E-2) .. c0_LuaChess.SubstrAll(opos,E+3);
+		end
+		H = H -1;
+	end
+	V = V -1;
+ end
+ c0_LuaChess.c0_position = npos;
+
+
+ if(c0_LuaChess.IndexOf(P1,"*")>=0 or P1=="0") then
+	return P1;	-- fischer-random castlings
+ end
+
+ 
+local cDret='';
+local cDp0="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789";
+local cDp = c0_LuaChess.c0_get_next_moves();
+local cDp1='';
+
+local c77=0;
+while c77 < string.len(cDp) do
+
+  local c7move = c0_LuaChess.Substr(cDp,c77,4);
+  local c9 = c0_LuaChess.Substr(c7move,0,2);
+  local c91 = c0_LuaChess.IndexOf(c0_LuaChess.c0_position, c9);
+  local c8 = c0_LuaChess.Substr(c7move,3,1);
+
+  if c0_LuaChess.Substr(c0_LuaChess.c0_position, c91-1, 1 ) == "p" and (c8 == "1" or c8 == "8") then
+
+		cDp1 = cDp1 .. c7move .. "[Q];" .. c7move .. "[R];" .. c7move .. "[B];" .. c7move .. "[N];";
+
+  else
+		cDp1 = cDp1 .. c7move .. "   ;";
+  end
+  
+  if c0_LuaChess.Substr( cDp, c77+4, 1) =="[" then
+  
+	c77 = c77 + 3;
+  end
+  c77 = c77 + 5;
+end
+
+if ch7==1 then
+
+	local cDcmp=P1;
+	if string.len(cDcmp)>4 and c0_LuaChess.Substr(cDcmp,4,3)=="[0]" then
+		cDcmp = c0_LuaChess.Substr(cDcmp,0,4);
+	end
+	
+	cDret = c0_LuaChess.Substr(cDp0, c0_LuaChess.IndexOfslow(cDp1, cDcmp)/8, 1);
+
+else
+	if ch7==-1 then
+	  local c5 = c0_LuaChess.IndexOf(cDp0,P1);
+	  local cDmove = c0_LuaChess.Substr(cDp1, c5*8,7);
+	  local c4 = c0_LuaChess.Substr(cDmove,5,1);
+	  c0_LuaChess.c0_become_from_engine = c4;
+	  if c0_LuaChess.c0_become_from_engine == " " then
+		c0_LuaChess.c0_become_from_engine = "Q";
+	  end
+	  c0_LuaChess.c0_become = c0_LuaChess.c0_become_from_engine;
+	  if c4=="Q" or c4==" " then
+		cDmove = c0_LuaChess.Substr(cDmove,0,4);
+	  end
+	  cDret = cDmove;
+	end
+end
+
+return cDret;
+end
+
+--------- Converts short notation to moveslist...
+function c0_LuaChess.c0_short2list()
+
+c0_LuaChess.c0_errflag=false;
+local  c0_1save_position=c0_LuaChess.c0_position;
+local  c0_1save_sidemoves=c0_LuaChess.c0_sidemoves;
+local  c0_1save_wKingmoved=c0_LuaChess.c0_wKingmoved;
+local  c0_1save_bKingmoved=c0_LuaChess.c0_bKingmoved;
+local  c0_1save_wLRockmoved=c0_LuaChess.c0_wLRockmoved;
+local  c0_1save_wRRockmoved=c0_LuaChess.c0_wRRockmoved;
+local  c0_1save_bLRockmoved=c0_LuaChess.c0_bLRockmoved;
+local  c0_1save_bRRockmoved=c0_LuaChess.c0_bRRockmoved;
+local  c0_1save_w00=c0_LuaChess.c0_w00;
+local  c0_1save_b00=c0_LuaChess.c0_b00;
+local  c0_1save_become=c0_LuaChess.c0_become;
+local  c0_1save_become_from_engine=c0_LuaChess.c0_become_from_engine;
+local  c0_1save_lastmovepawn= c0_LuaChess.c0_lastmovepawn;
+local  c0_1save_moveslist= c0_LuaChess.c0_moveslist;
+
+c0_LuaChess.c0_moveslist = "";		-- will contain moves on return...
+
+
+if( string.len( c0_LuaChess.c0_start_FEN ) >0 ) then
+	c0_LuaChess.c0_set_FEN( c0_LuaChess.c0_start_FEN )
+	if(c0_LuaChess.c0_fischer) then
+        c0_LuaChess.c0_fischer_adjustmoved()
+    end
+else
+
+
+c0_LuaChess.c0_position = "wpa2,wpb2,wpc2,wpd2,wpe2,wpf2,wpg2,wph2," ..
+"wRa1,wNb1,wBc1,wQd1,wKe1,wBf1,wNg1,wRh1," ..
+"bpa7,bpb7,bpc7,bpd7,bpe7,bpf7,bpg7,bph7," ..
+"bRa8,bNb8,bBc8,bQd8,bKe8,bBf8,bNg8,bRh8,";
+
+c0_LuaChess.c0_wKingmoved = false;
+c0_LuaChess.c0_bKingmoved = false;
+c0_LuaChess.c0_wLRockmoved = false;
+c0_LuaChess.c0_wRRockmoved = false;
+c0_LuaChess.c0_bLRockmoved = false;
+c0_LuaChess.c0_bRRockmoved = false;
+c0_LuaChess.c0_w00 = false;
+c0_LuaChess.c0_b00 = false;
+
+c0_LuaChess.c0_lastmovepawn = 0;
+c0_LuaChess.c0_sidemoves=1;
+end
+
+c0_LuaChess.c0_become="";
+c0_LuaChess.c0_become_from_engine="";
+
+local c0_i7=0;
+while c0_i7< string.len(c0_LuaChess.c0_PG_sh) do
+ local  c0_move8=c0_LuaChess.c0_shortCode(-1, c0_LuaChess.Substr( c0_LuaChess.c0_PG_sh, c0_i7,1));
+ local  q = c0_LuaChess.Substr( c0_LuaChess.c0_PG_sh, c0_i7, 4);
+ if q=="00**" or q=="000*" then
+	c0_move8 = q;
+	c0_i7 = c0_i7 + 3;
+	q = "****";
+ end
+ if string.len(c0_move8)<4 then
+	c0_LuaChess.c0_errflag = true;
+	break;
+ end
+
+ if c0_LuaChess.c0_fischer then
+	c0_LuaChess.c0_fischer_cstl_move( c0_LuaChess.Substr(c0_move8,0,4),true);
+    if q=="****" then
+		c0_LuaChess.c0_moveslist = c0_LuaChess.Substr( c0_LuaChess.c0_moveslist, 0, string.len(c0_LuaChess.c0_moveslist)-4) .. c0_move8;
+	end
+ else
+	local  c71 = c0_LuaChess.Substr(c0_move8,0,2);
+	local  c72 = c0_LuaChess.Substr(c0_move8,2,2);
+	c0_LuaChess.c0_moveto(c0_LuaChess.c0_convH888(c71),c0_LuaChess.c0_convH888(c72), true);
+ end
+	
+ c0_LuaChess.c0_sidemoves=-c0_LuaChess.c0_sidemoves;
+ c0_i7 = c0_i7 + 1;
+end
+
+c0_LuaChess.c0_position=c0_1save_position;
+c0_LuaChess.c0_sidemoves=c0_1save_sidemoves;
+c0_LuaChess.c0_wKingmoved=c0_1save_wKingmoved;
+c0_LuaChess.c0_bKingmoved=c0_1save_bKingmoved;
+c0_LuaChess.c0_wLRockmoved=c0_1save_wLRockmoved;
+c0_LuaChess.c0_wRRockmoved=c0_1save_wRRockmoved;
+c0_LuaChess.c0_bLRockmoved=c0_1save_bLRockmoved;
+c0_LuaChess.c0_bRRockmoved=c0_1save_bRRockmoved;
+c0_LuaChess.c0_w00=c0_1save_w00;
+c0_LuaChess.c0_b00=c0_1save_b00;
+c0_LuaChess.c0_become=c0_1save_become;
+c0_LuaChess.c0_become_from_engine=c0_1save_become_from_engine;
+c0_LuaChess.c0_lastmovepawn=c0_1save_lastmovepawn;
+--c0_moveslist=c0_1save_moveslist;
+
+
+if string.len( c0_LuaChess.c0_start_FEN ) >0 then
+		c0_LuaChess.c0_set_board_situation( c0_LuaChess.c0_position, c0_LuaChess.c0_wKingmoved, c0_LuaChess.c0_wLRockmoved,
+            c0_LuaChess.c0_wRRockmoved, c0_LuaChess.c0_w00, c0_LuaChess.c0_bKingmoved, c0_LuaChess.c0_bLRockmoved,
+            c0_LuaChess.c0_bRRockmoved, c0_LuaChess.c0_b00, c0_LuaChess.c0_lastmovepawn, c0_LuaChess.c0_moveslist, c0_LuaChess.c0_sidemoves )
+			
+end
+
+end
 
 -- Call samples...
 -- c0_LuaChess.a_SAMPLES ()
