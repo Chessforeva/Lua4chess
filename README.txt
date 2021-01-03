@@ -30,7 +30,7 @@ Other:
 2. abkbase.bat - an Arena book reader sample
 
 3. pgn2js.bat - prepares pgn file to .js, see samples at
-	http://gitlab.com/chessforeva/pgn2js
+	https://gitlab.com/chessforeva/pgn2web
 
 Also lua to loadfile:
 ---------------------
