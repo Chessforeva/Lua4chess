@@ -102,8 +102,6 @@ while true do
 						
 					end
 					Wout = Wout .. '"';
-					Fischer = false;
-					Fen = "";
 				end
 				
 				if string.upper(string.sub(ks,1,6))=="WHITE " then
@@ -126,11 +124,9 @@ while true do
 				end	
 				if string.upper(string.sub(ks,1,4))=="FEN " then
 					Wout = Wout .. "[F_".. Q.."]";
-					Fen = Q;
 				end	
 				if string.upper(string.sub(ks,1,6))=="SETUP " then
 					Wout = Wout .. "[S_".. Q.."]";
-					Fischer = true;
 				end					
 				if string.upper(string.sub(ks,1,6))=="ROUND " then
 					Wout = Wout .. "[R_".. Q.."]";
