@@ -41,14 +41,17 @@ while true do
   if (l==nil) or string.find(string.upper(l),"EVENT ")~=nil then
     if block == 1 then
 		block = 0
-		
+
+		c0_LuaChess.c0_fischer = false;
+		c0_LuaChess.c0_start_FEN = "";
 		c0_LuaChess.c0_side =1					-- This side is white.   For black set -1
 		c0_LuaChess.c0_set_start_position("")		    -- Set the initial position...
 		c0_PGN_short = true; 
 		c0_PG_sh = "";
 		
 		local mlist = c0_LuaChess.c0_get_moves_from_PGN(S);
-		
+
+				
 		local k = 1;
 		local ks = "";
 		local Z = c0_LuaChess.c0_PGN_header;
@@ -97,9 +100,10 @@ while true do
 						o:write('"' .. Q .. '"' .. ",");
 						o:write("games:["..CR);
 						
-						--print(Q);
 					end
 					Wout = Wout .. '"';
+					Fischer = false;
+					Fen = "";
 				end
 				
 				if string.upper(string.sub(ks,1,6))=="WHITE " then
@@ -120,11 +124,13 @@ while true do
 					--Wout = Wout .. "[s_".. Q.."]";
 					sitewas = Q;
 				end	
-				if string.upper(string.sub(ks,1,5))=="FEN " then
+				if string.upper(string.sub(ks,1,4))=="FEN " then
 					Wout = Wout .. "[F_".. Q.."]";
+					Fen = Q;
 				end	
-				if string.upper(string.sub(ks,1,5))=="SETUP " then
+				if string.upper(string.sub(ks,1,6))=="SETUP " then
 					Wout = Wout .. "[S_".. Q.."]";
+					Fischer = true;
 				end					
 				if string.upper(string.sub(ks,1,6))=="ROUND " then
 					Wout = Wout .. "[R_".. Q.."]";
@@ -167,8 +173,11 @@ while true do
 		
 	-- for debug purposes, slow
 	if true then
-	
+		c0_LuaChess.c0_set_FEN (c0_LuaChess.c0_start_FEN)
+		c0_LuaChess.c0_set_start_position("")		    -- Set the initial position...
+				
 		c0_LuaChess.c0_short2list();
+		
 		local m2 = c0_LuaChess.c0_moveslist;
 		c0_LuaChess.c0_PG_sh = "";
 
@@ -202,7 +211,9 @@ while true do
   end
   
   if block == 1 then
-	S = S .. " " .. l;
+	if(string.sub( string.upper(l),0,9 )~="[VARIANT ") then
+		S = S .. " " .. l;
+	end
   end
   
 end
@@ -231,7 +242,6 @@ fname = "tourn.pgn"
 
 print(fname);
 encodefile(fname);
-
 
 
 

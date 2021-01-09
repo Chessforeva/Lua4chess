@@ -2,10 +2,10 @@
 -- Board in variables, moves, FEN & PGN functions
 -- A ready code for free usage in any type of project
 -- no clock, no chess engine
--- Author: grozny0   at  gmail.com
+
 -- http://chessforeva.blogspot.com
 
---
+-- LuaJIT compatible and much faster: LuaJIT.org
 
 -- This way the class c0_LuaChess is defined (similar)
 -- Can be substituted as needed (module,library,object,class,etc...)
@@ -161,7 +161,13 @@ function c0_LuaChess.a_SAMPLES ( )
 
     -- 2.PGN functions test (ok):
     c0_LuaChess.printout("PGN -> moves")
-	local PGN0="1.d4 d5 2.c4 e6 {comment goes here} 3.Nf3 Nf6 4.g3 Be7 (4.h4 or variant) 5.Bg2 0-0 6.0-0 dxc4 7.Qc2 a6 8.Qxc4 b5 9.Qc2 Bb7 10.Bd2 Be4 11.Qc1 Bb7 12.Qc2 Ra7 13.Rc1 Be4 14.Qb3 Bd5 15.Qe3 Nbd7 16.Ba5 Bd6 17.Nc3 Bb7 18.Ng5 Bxg2 19.Kxg2 Qa8+ 20.Qf3 Qxf3+ 21.Kxf3 e5 22.e3 Be7 23.Ne2 Re8 24.Kg2 Nd5 25.Nf3 Bd6 26.dxe5 Nxe5 27.Nxe5 Rxe5 28.Nd4 Ra8 29.Nc6 Re6 30.Rc2 Nb6 31.b3 Kf8 32.Rd1 Ke8 33.Nd4 Rf6 34.e4 Rg6 35.e5 Be7 36.Rxc7 Nd5 37.Rb7 Bd8 38.Nf5 Nf4+ 39.Kf3 Bxa5 40.gxf4 Bb4 41.Rdd7 Rc8 42.Rxf7 Rc3+ 43.Ke4 1-0"
+	local PGN0='1.d4 d5 2.c4 e6 {comment goes here} 3.Nf3 Nf6 4.g3 Be7 (4.h4 or variant) '..
+			'5.Bg2 0-0 6.0-0 dxc4 7.Qc2 a6 8.Qxc4 b5 9.Qc2 Bb7 10.Bd2 Be4 11.Qc1 Bb7 '..
+			'12.Qc2 Ra7 13.Rc1 Be4 14.Qb3 Bd5 15.Qe3 Nbd7 16.Ba5 Bd6 17.Nc3 Bb7 18.Ng5 Bxg2 '..
+			'19.Kxg2 Qa8+ 20.Qf3 Qxf3+ 21.Kxf3 e5 22.e3 Be7 23.Ne2 Re8 24.Kg2 Nd5 25.Nf3 Bd6 '..
+			'26.dxe5 Nxe5 27.Nxe5 Rxe5 28.Nd4 Ra8 29.Nc6 Re6 30.Rc2 Nb6 31.b3 Kf8 32.Rd1 Ke8 '..
+			'33.Nd4 Rf6 34.e4 Rg6 35.e5 Be7 36.Rxc7 Nd5 37.Rb7 Bd8 38.Nf5 Nf4+ 39.Kf3 Bxa5 '..
+			'40.gxf4 Bb4 41.Rdd7 Rc8 42.Rxf7 Rc3+ 43.Ke4 1-0';
 	local mlist0 = c0_LuaChess.c0_get_moves_from_PGN(PGN0)
     c0_LuaChess.printout (mlist0)
 	if c0_LuaChess.c0_PGN_short then
@@ -176,7 +182,30 @@ function c0_LuaChess.a_SAMPLES ( )
 
 	--3.Fischerrandom support test (ok):
     c0_LuaChess.printout("Fischer-random  PGN -> moves")
-	local PGN3="[White Aronian, Levon][Black Rosa, Mike][Result 0:1][SetUp 1][FEN bbrkqnrn/pppppppp/8/8/8/8/PPPPPPPP/BBRKQNRN w GCgc - 0 0] 1. c4 e5 2. Nhg3 Nhg6 3. b3 f6 4. e3 b6 5. Qe2 Ne6 6. Qh5 Rh8 7. Nf5 Ne7 8. Qxe8+ Kxe8 9. N1g3 h5 10. Nxe7 Kxe7 11. d4 d6 12. h4 Kf7 13. d5 Nf8 14. f4 c6 15. fxe5 dxe5 16. e4 Bd6 17. Bd3 Ng6 18. O-O Nxh4 19. Be2 Ng6 20. Nf5 Bc5+ 21. Kh2 Nf4 22. Rc2 cxd5 23. exd5 h4 24. Bg4 Rce8 25. Bb2 g6 26. Nd4 exd4 27.Rxf4 Bd6 0-1"
+	local PGN3='[Event "Champ Showdown 9LX 2020"]'..
+				'[Site "lichess.org INT"]'..
+				'[Date "2020.09.11"]'..
+				'[Round "1.5"]'..
+				'[White "Vachier-Lagrave, Maxime"]'..
+				'[Black "Carlsen, Magnus"]'..
+				'[Result "0-1"]'..
+				'[Variant "Chess960"]'..
+				'[SetUp "1"]'..
+				'[FEN "nnbrkqrb/pppppppp/8/8/8/8/PPPPPPPP/NNBRKQRB w GDgd - 0 1"]'..
+				'[WhiteTitle "GM"][BlackTitle "GM"]'..
+				'[WhiteElo "2778"][BlackElo "2863"]'..
+				'[EventDate "2020.09.11"]'..
+				'1. e4 c5 2. Nb3 b6 3. Qe2 g6 4. O-O Ba6 5. d3 Nc6 6. g3 Nc7 7. Nc3 Bxc3 8. bxc3 g5 '..
+				'9. f4 gxf4 10. Bxf4 Ne6 11. e5 Qg7 12. Rde1 Rh8 13. Qh5 c4 14. Nc1 cxd3 15.cxd3 Qg6 '..
+				'16. Qd1 h5 17. Re3 h4 18. Ne2 O-O-O 19. d4 Na5 20. Be4 Qg7 21. Rf2 Rdg8 22. Bg2 Bb7 '..
+				'23. d5 Nxf4 24. Rxf4 hxg3 25. hxg3 Kb8 26. Qd3 Qh7 27. Qxh7 Rxh7 28.Nc1 Rc8 29. Nb3 Nc4 '..
+				'30. Re2 e6 31. d6 Rg7 32. Bxb7 Kxb7 33. Kg2 Rg5 34. Rfe4 Ka6 35. g4 b5 36. a4 bxa4 '..
+				'37. Ra2 a3 38. Nd2 Nxd2 39. Rxa3+ Kb6 40. Rb4+ Kc6 41.Ra6+ Kd5 42. Ra5+ Rc5 43. Rd4+ Kc6 '..
+				'44. Rxa7 Nc4 45. Rc7+ Kb5 46. Rxd7 Nxe5 47.Rb7+ Kc6 48. Rc7+ Kb6 49. Rb4+ Rb5 50. Rxb5+ Kxb5 '..
+				'51. d7 Nxd7 52. Rxd7 Rxg4+ 53.Kf3 f5 54. Re7 Re4 55. Rc7 Rc4 56. Re7 Rxc3+ 57. Kf4 Rc4+ '..
+				'58. Kf3 Re4 59. Rc7 e5 60. Rc8 Rc4 61. Re8 Rf4+ 62. Kg3 Re4 63. Kf3 Kc5 '..
+				'64. Ra8 Kd5 65. Ra5+ Ke6 66.Ra6+ Ke7 0-1';
+ 
 	local mlist3= c0_LuaChess.c0_get_moves_from_PGN(PGN3)
     c0_LuaChess.printout (mlist3)
 	if c0_LuaChess.c0_PGN_short then
@@ -2011,7 +2040,7 @@ while(i<string.len(str)) do
 	else
         c0_LuaChess.c0_become_from_engine = "Q"
     end
-	
+
 	if(c0_LuaChess.c0_PGN_short) then
 		c0_LuaChess.c0_PG_sh = c0_LuaChess.c0_PG_sh .. c0_LuaChess.c0_shortCode(1,move2);
 	end
@@ -2305,6 +2334,7 @@ function c0_LuaChess.c0_get_next_moves ( )
 			 c0_Dposs=c0_Dposs .. c0_LuaChess.c0_DCN(c0_Dfrom_move,c0_LuaChess.c0_sidemoves,1,1)
 			 c0_Dposs=c0_Dposs .. c0_LuaChess.c0_DCN(c0_Dfrom_move,c0_LuaChess.c0_sidemoves,-1,1)
 		end
+
 		if(c0_Dfigure=="N") then
 
 			 c0_Dposs=c0_Dposs .. c0_LuaChess.c0_DCN(c0_Dfrom_move,2,1,1)
@@ -2391,7 +2421,6 @@ function c0_LuaChess.c0_DCN (c0_D7from_at, c0_Dvert_TX, c0_Dhoriz_TX, c0_Dcntx)
 	local c0_D7to_at=c0_LuaChess.ToString(c0_D7vert) .. c0_LuaChess.ToString(c0_D7horiz)
 
 	if( c0_LuaChess.c0_can_be_moved( c0_D7from_at, c0_D7to_at, false ) ) then
-
 		c0_LuaChess.c0_foundmove  = c0_LuaChess.c0_convE777( c0_D7from_at ) .. c0_LuaChess.c0_convE777( c0_D7to_at )
 		c0_D7poss = c0_D7poss .. c0_LuaChess.c0_foundmove .. ","
 	end
@@ -3879,7 +3908,9 @@ if(string.len(c0_king)>0 and string.len(c0_rook)>0) then
             c0_LuaChess.c0_position = string.gsub(c0_LuaChess.c0_position,c0_rook,c0_rook2)
         end
 	end
+	c0_LuaChess.c0_lastmovepawn = 0;
 end
+
 
 --
 end
@@ -4033,7 +4064,6 @@ local opos = c0_LuaChess.c0_position;
  end
  c0_LuaChess.c0_position = npos;
 
-
  if(c0_LuaChess.IndexOf(P1,"*")>=0 or P1=="0") then
 	return P1;	-- fischer-random castlings
  end
@@ -4171,7 +4201,7 @@ while c0_i7< string.len(c0_LuaChess.c0_PG_sh) do
 	local  c72 = c0_LuaChess.Substr(c0_move8,2,2);
 	c0_LuaChess.c0_moveto(c0_LuaChess.c0_convH888(c71),c0_LuaChess.c0_convH888(c72), true);
  end
-	
+
  c0_LuaChess.c0_sidemoves=-c0_LuaChess.c0_sidemoves;
  c0_i7 = c0_i7 + 1;
 end
@@ -4190,7 +4220,6 @@ c0_LuaChess.c0_become=c0_1save_become;
 c0_LuaChess.c0_become_from_engine=c0_1save_become_from_engine;
 c0_LuaChess.c0_lastmovepawn=c0_1save_lastmovepawn;
 --c0_moveslist=c0_1save_moveslist;
-
 
 if string.len( c0_LuaChess.c0_start_FEN ) >0 then
 		c0_LuaChess.c0_set_board_situation( c0_LuaChess.c0_position, c0_LuaChess.c0_wKingmoved, c0_LuaChess.c0_wLRockmoved,
