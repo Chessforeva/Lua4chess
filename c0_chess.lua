@@ -2,7 +2,6 @@
 -- Board in variables, moves, FEN & PGN functions
 -- A ready code for free usage in any type of project
 -- no clock, no chess engine 
--- Author: grozny0   at  gmail.com
 -- http://chessforeva.blogspot.com
 
 --
