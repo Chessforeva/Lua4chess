@@ -2980,13 +2980,15 @@ local c0_ret9=c0_LuaChess.c0_fischer_cst_tCr(c0_move)
 		c0_color49="b"
 	end
 
-		if( c0_LuaChess.c0_is_mate_to_king( c0_color49, true ) ) then
-           c0_ret9 = c0_ret9 .. "#"
-		else
+
             if( c0_LuaChess.c0_is_check_to_king( c0_color49 ) ) then
-                c0_ret9 = c0_ret9 .. "+"
+
+		if( c0_LuaChess.c0_is_mate_to_king( c0_color49, true ) ) then
+			c0_ret9 = c0_ret9 .. "#"
+		else
+			c0_ret9 = c0_ret9 .. "+"
+		end
             end
-        end
 
         end
         end
