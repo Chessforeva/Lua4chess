@@ -2469,8 +2469,16 @@ function board_copy( dst, src ) -- void
    --ASSERT(47, dst.sp~=nil );
    --ASSERT(48, board_is_ok(src));
 
-   dst.square = src.square;
-   dst.pos = src.pos;
+   dst.square = {};
+   for i = 0, table.getn(src.square)-1, 1 do
+     dst.square[1+i] = src.square[1+i];
+   end
+   
+   dst.pos = {};
+   for i = 0, table.getn(src.pos)-1, 1 do
+     dst.pos[1+i] = src.pos[1+i];
+   end
+   
    dst.piece = {};
    dst.piece[1+0] = {};
    dst.piece[1+1] = {};
