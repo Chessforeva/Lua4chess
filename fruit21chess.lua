@@ -2482,7 +2482,10 @@ function board_copy( dst, src ) -- void
      dst.piece[1+1][1+i] = src.piece[1+1][1+i];
    end
 
-   dst.piece_size = src.piece_size;
+   dst.piece_size = {};
+   for i = 0, table.getn(src.piece_size)-1, 1 do
+     dst.piece_size[1+i] = src.piece_size[1+i];
+   end
 
    dst.pawn = {};
    dst.pawn[1+0] = {};
@@ -5320,6 +5323,7 @@ function printboard() -- void
          else
            s = s .. piece_to_char(piece);
          end
+		 s = s .. " ";
 
          file = file + 1;
       end
@@ -14948,8 +14952,10 @@ function trans_retrieve( trans, key, Ret )  -- bool
    for i = 0, ClusterSize-1 , 1 do
 
       entry = trans.table[1+ei+i];
+	  
+	  if (entry ~= nil and entry.lock ~= nil) then
 
-      if (entry ~=nil and entry.lock == KEY_LOCK(key)) then
+       if (entry.lock == KEY_LOCK(key)) then
 
          -- found
 
@@ -14966,6 +14972,8 @@ function trans_retrieve( trans, key, Ret )  -- bool
          Ret.trans_max_value = entry.max_value;
 
          return true;
+	   end
+	   
 	  else
          return false;
       end
@@ -15459,7 +15467,7 @@ function autogame()
   while(true) do
 
     if( not randomopening( mlist ) ) then
-      do_input( "go movetime 15");
+      do_input( "go movetime 1");
       print("nodes: " .. SearchCurrent.node_nb);	-- to see performance
     end
 
