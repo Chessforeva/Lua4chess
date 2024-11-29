@@ -261,7 +261,7 @@ function getKey()
  local k = i64(0);
  local pc="pNBRQK";
  local i = 1;
- local d,x,v,h,cp,m,l,r,p;
+ local x,v,h,cp,m,l,r,p,u;
  local s = c0_LuaChess.c0_position;
  -- get key from board
  while i<string.len(s) do
@@ -300,25 +300,22 @@ function getKey()
 
  if(c0_LuaChess.c0_lastmovepawn>0) then
 	p = c0_LuaChess.c0_lastmovepawn;
-	m=string.sub( c0_LuaChess.c0_moveslist,
-		string.len(c0_LuaChess.c0_moveslist)-3 );
+	u = string.char(97+p-1);
+	if(c0_LuaChess.c0_sidemoves > 0) then
+		m = u.."7"..u.."5";
+		cp = "bp";
+	else
+		m = u.."2"..u.."4";
+		cp = "wp"
+	end
 
-	if( string.byte(m,1)==string.byte(m,3) and
-		( string.byte(m,1)-96==p ) ) then
-		d=string.byte(m,2)-string.byte(m,4);
-		if(d==-2 or d==2) then
-			if(d==2) then
-				cp = "wp";
-			else
-				cp = "bp";
-			end
-			l=string.char(97+p-2) .. string.sub(m,4,4);
-			r=string.char(97+p) .. string.sub(m,4,4);
+	-- no need look history
 
-			if( string.find(s,l)~=nil or string.find(s,r)~=nil ) then
-				k = i64_xor( k, Random64[1+772+p-1] );
-			end
-		end
+	l=string.char(97+p-2) .. string.sub(m,4,4);
+	r=string.char(97+p) .. string.sub(m,4,4);
+
+	if( string.find(s,l)~=nil or string.find(s,r)~=nil ) then
+		k = i64_xor( k, Random64[1+772+p-1] );
 	end
  end
 
@@ -399,6 +396,7 @@ function sample_getAllbyPos(moveslist)
 print("Polybase after: " .. moveslist); 
 c0_LuaChess.c0_set_start_position(moveslist);
 
+
 local key = getKey();
 local j=lookupByKey(key);
 
@@ -419,4 +417,5 @@ end
 end
 
 sample_getAllbyPos("e2e4c7c5b1c3");
+
 
