@@ -26,6 +26,7 @@ Other:
 ---------
 
 1. polybase.bat - a polyglot book reader sample
+   (small_book.bin is a short-test file of junk records)
 
 2. abkbase.bat - an Arena book reader sample
 

@@ -238,18 +238,26 @@ function readBinFile(filename)
   local buf, key,move,weight,learn;
   local in_file = assert(io.open(filename, "rb"));
   local k=0;
+  local key_pre=i64(0);
   while true do
     local buf = in_file:read(16);
     if not buf then break end;
     k = k+1;
     binBase[k]={};
-    binBase[k].key = i64_ax( binNumb(buf,1,4), binNumb(buf,5,4) );
+    key = i64_ax( binNumb(buf,1,4), binNumb(buf,5,4) );
+    binBase[k].key = key;
     binBase[k].move = binNumb(buf,9,2);
     binBase[k].weight = binNumb(buf,11,2);
     binBase[k].learn = binNumb(buf,13,4);
     if k%1000==0 then
       print(k);
     end
+
+    -- verify book consistency
+    if(i64_gt(key_pre,key)) then
+      print("Error: The book is unsorted! Should be ordered ascending.");
+    end
+    key_pre = i64_clone(key);
   end
   in_file:close()
   print("all positions in memory");
@@ -333,29 +341,29 @@ end
 
 function lookupByKey(k)
  local n = table.getn(binBase);
- local i = bit.rshift(n,1);
- local i2;
- while i>0 and i<=n do
-	i2 = i;
+ local i = 1;
+ local p;
+ local j;
+
+ while (i<=n) do
+
 	if i64_gt(k, binBase[i].key ) then
-		i = bit.rshift(n+i+1,1);
-		if i==i2 then
-			i=i+1;
+		p = bit.rshift(n-i,1);
+		j = i+p+1;
+		while( p>0 and (j>n or i64_le(k, binBase[j].key ))) do
+			p = bit.rshift(p,1);
+			j = i+p+1;
 		end
-	else
-		if i64_lt(k, binBase[i].key ) then
-			n = i;
-			i = bit.rshift(i+1,1);
-		else
-			while( i>1 and i64_eq(k, binBase[i-1].key ) ) do
-				i=i-1;
-			end
-			return i;
-		end
-		if i==i2 then
-			i=i-1;
-		end
+		i = j;
 	end
+
+	while( i>1 and i64_eq(k, binBase[i-1].key ) ) do
+		i = i - 1;
+	end
+	if( i64_eq(k, binBase[i].key ) ) then
+		return i;
+	end
+
  end
  return nil;
 end
@@ -389,20 +397,17 @@ binBase = {};
 -- scan .bin file 
 readBinFile("book_small.bin");
 
-
 -- Sample for all moves for given position
 function sample_getAllbyPos(moveslist)
 
 print("Polybase after: " .. moveslist); 
 c0_LuaChess.c0_set_start_position(moveslist);
 
-
 local key = getKey();
-local j=lookupByKey(key);
 
-if (j~=nil) then
-  print("key:" .. i64_toString(key));
-end
+print("key:" .. i64_toString(key));
+
+local j=lookupByKey(key);
 
 while(j~=nil) do
   local move = getMove(j);
