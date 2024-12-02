@@ -269,7 +269,7 @@ function getKey()
  local k = i64(0);
  local pc="pNBRQK";
  local i = 1;
- local x,v,h,cp,m,l,r,p,u;
+ local x,v,h,cp,m,l,r,p,u,v2;
  local s = c0_LuaChess.c0_position;
  -- get key from board
  while i<string.len(s) do
@@ -311,16 +311,17 @@ function getKey()
 	u = string.char(97+p-1);
 	if(c0_LuaChess.c0_sidemoves > 0) then
 		m = u.."7"..u.."5";
-		cp = "bp";
+		cp = "wp";
 	else
 		m = u.."2"..u.."4";
-		cp = "wp"
+		cp = "bp"
 	end
 
 	-- no need look history
 
-	l=string.char(97+p-2) .. string.sub(m,4,4);
-	r=string.char(97+p) .. string.sub(m,4,4);
+	v2 = string.sub(m,4,4);
+	l=cp .. string.char(97+p-2) .. v2;
+	r=cp .. string.char(97+p) .. v2;
 
 	if( string.find(s,l)~=nil or string.find(s,r)~=nil ) then
 		k = i64_xor( k, Random64[1+772+p-1] );
@@ -342,10 +343,12 @@ end
 function lookupByKey(k)
  local n = table.getn(binBase);
  local i = 1;
+ local i2;
  local p;
  local j;
 
  while (i<=n) do
+	i2 = i;
 
 	if i64_gt(k, binBase[i].key ) then
 		p = bit.rshift(n-i,1);
@@ -364,19 +367,25 @@ function lookupByKey(k)
 		return i;
 	end
 
+	if(i<=i2) then
+		i = i2+1;
+	end
+
  end
  return nil;
 end
 
+
 -- returns uci move after lookup
 function getMove(i)
- local from = bit.band( bit.rshift( binBase[i].move, 6 ), 0x77 );
+ local from = bit.band( bit.rshift( binBase[i].move, 6 ), 0x3F );
  local fv = bit.band( bit.rshift( from, 3 ), 0x7 );
  local fh = bit.band( from, 0x7 );
- local to = bit.band( binBase[i].move, 0x77 );
+ local to = bit.band( binBase[i].move, 0x3F );
  local tv = bit.band( bit.rshift( to, 3 ), 0x7 );
  local th = bit.band( to, 0x7 );
  local p = bit.band( bit.rshift( binBase[i].move, 12 ), 0x7 );
+
  local uci = string.char(97+fh) .. string.char(49+fv) ..
 			string.char(97+th) .. string.char(49+tv);
  if(p>1) then
@@ -395,7 +404,9 @@ end
 binBase = {};
 
 -- scan .bin file 
+
 readBinFile("book_small.bin");
+--readBinFile("book_tiny.bin");
 
 -- Sample for all moves for given position
 function sample_getAllbyPos(moveslist)
@@ -421,6 +432,6 @@ end
 
 end
 
-sample_getAllbyPos("e2e4c7c5b1c3");
+sample_getAllbyPos("e2e4c7c5g1f3");
 
 

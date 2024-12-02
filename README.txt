@@ -25,8 +25,8 @@ This is a small sample of Lua based chess to run from command line.
 Other:
 ---------
 
-1. polybase.bat - a polyglot book reader sample
-   (book_small.bin is a short-test file of junk records)
+1. polybase.bat - a polyglot opening book reader sample on
+	book_small.bin and book_tiny.bin
 
 2. abkbase.bat - an Arena book reader sample
 
