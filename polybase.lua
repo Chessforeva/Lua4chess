@@ -388,8 +388,8 @@ function getMove(i)
 
  local uci = string.char(97+fh) .. string.char(49+fv) ..
 			string.char(97+th) .. string.char(49+tv);
- if(p>1) then
-	uci = uci + string.sub("nbrq", p+1,p+1);
+ if(p>0 and p<5) then
+	uci = uci + string.sub("nbrq", p,p);
  end
  return uci;
 end
