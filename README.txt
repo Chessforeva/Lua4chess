@@ -33,6 +33,15 @@ Other:
 3. pgn2js.bat - prepares pgn file to .js, see samples at
 	https://gitlab.com/chessforeva/pgn2web
 
+Win64 folder:
+------------------------------------ (updated dec.2024)
+
+1. chesslib.bat -  a sample of u64chesslib.dll library usage in Lua
+                    It does most of chess logic at C-level. Intended for python, works on Lua too.
+
+2. exehandler.lua - a sample of Stockfish usage from Lua - run in background, go search, read bestmove, release
+                      (requires executable of chess engine, works also with LuaJIT)
+
 Also lua to loadfile:
 ---------------------
 i64.lua - emulated 64bit variables to get working (1<<63)
@@ -42,4 +51,3 @@ noBitOp.lua -  can be used instead of BitOp (but slower)
 c0_chess_subroutine.lua - chess logic, not a fastest code
 
 
-Updated 2021.jan.
