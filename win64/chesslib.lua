@@ -20,6 +20,8 @@ ffi.cdef([[
 	char* parsepgn(char*);
 	bool ischeck();
 	bool ischeckmate();
+	int sidetomove();
+	int swaptomove();
 	//unsigned long long polyglotkey();
 	char* spolyglotkey();
 	int i_movegen(int);
@@ -27,8 +29,10 @@ ffi.cdef([[
 	char* i_moveinfo(int);
 	void i_skipmove(int);
 	int piecescount();
+	int whitecount();
+	int blackcount();
 	int materialdiff();
-	
+	bool seemslegitpos();
 ]])
 
 ------------------------------------------------------
@@ -48,8 +52,23 @@ print( ffi.string( chesslib.getfen() ) )
 
 print( ffi.string( chesslib.spolyglotkey() ) )
 print( chesslib.piecescount() )
+print( chesslib.whitecount() )
+print( chesslib.blackcount() )
 -- this is kinda indicator of material, nothing precise
 print( chesslib.materialdiff() )
+
+
+now_tomove = chesslib.swaptomove()
+-- now opponent should move from same position (nullmove)
+-- swap back
+chesslib.swaptomove()
+
+if( chesslib.sidetomove() == 0) then
+  print("white to move")
+else  
+  print("black to move")
+end
+
 
 chesslib.movegen()
 print( ffi.string( chesslib.legalmoves() ) )
@@ -72,6 +91,13 @@ print( ffi.string( chesslib.sboard() ) )
 u2 = ffi.new("char[99]", "e7e5 g1f3 d7d6" )
 print( chesslib.parseucimoves( u2 ) )
 print( ffi.string( chesslib.sboard() ) )
+
+-- Try to set strange chess position
+-- Validator when generating chess positions
+print( chesslib.seemslegitpos() )
+chesslib.setfen( ffi.new("char[80]", "PPPPPPPP w") )
+print( chesslib.seemslegitpos() )
+
 
 ------------------------------------------------------
 print("4.Iterations. Solve puzzle....")

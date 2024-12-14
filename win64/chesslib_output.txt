@@ -23,7 +23,10 @@ RNBQKBNRPPPPPPPP                                pppppppprnbqkbnrwKQkq
 rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 463B96181691FC9C
 32
+16
+16
 0
+white to move
 Nb1-a3 Nb1-c3 Ng1-f3 Ng1-h3 a2-a3 a2-a4 b2-b3 b2-b4 c2-c3 c2-c4 d2-d3 d2-d4 e2-e3 e2-e4 f2-f3 f2-f4 g2-g3 g2-g4 h2-h3 h2-h4 
 2.Moving e4 ......
 1
@@ -61,6 +64,8 @@ PPPP.PPP
 RNBQKB.R
 w 
 
+true
+false
 4.Iterations. Solve puzzle....
 Solve checkmate in 2 moves, the right move is 1.Rd8 Kd3 2.Nc5#
 7
@@ -78,7 +83,7 @@ w
 Lua says
 Rh8-d8 
 5.Move info and skips....
-qh4-d8 +#  
+qd8-h4 +#  
 rnb.kbnr
 pppp.ppp
 ........
