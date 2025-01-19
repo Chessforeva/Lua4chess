@@ -132,7 +132,7 @@ function readAbkFile(filename)
 	binBase[k].won_games=readNumb(buf,9,12);
 	binBase[k].lost_games=readNumb(buf,13,16);
 	binBase[k].hz=readNumb(buf,17,20);
-	binBase[k].first_child=readNumb(buf,21,22); -- next move (answer)
+	binBase[k].first_child=readNumb(buf,21,24); -- next move (answer)
 	binBase[k].next_sibling=readNumb(buf,25,28); -- other legal move at the same ply
 
     if k%1000==0 then
