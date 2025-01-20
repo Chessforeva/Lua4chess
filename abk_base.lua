@@ -21,7 +21,8 @@ function readNumb(s,from,to)
     i=i+1;
 	b=b*256;
   end
-  if string.byte(s,to)==255 then
+  -- last bit is sign for signed and will never be 1 for unsigned int
+  if string.byte(s,to)>127 then
     r=r-b;
   end
   return r;
@@ -128,12 +129,12 @@ function readAbkFile(filename)
 	end
 	binBase[k].uci = uci;
 	binBase[k].priority=string.byte( buf,4);
-	binBase[k].cnt_games=readNumb(buf,5,8);
+	binBase[k].cnt_games=readNumb(buf,5,8);  -- unsigned int
 	binBase[k].won_games=readNumb(buf,9,12);
 	binBase[k].lost_games=readNumb(buf,13,16);
 	binBase[k].hz=readNumb(buf,17,20);
-	binBase[k].first_child=readNumb(buf,21,24); -- next move (answer)
-	binBase[k].next_sibling=readNumb(buf,25,28); -- other legal move at the same ply
+	binBase[k].first_child=readNumb(buf,21,24); -- next move (answer), signed
+	binBase[k].next_sibling=readNumb(buf,25,28); -- other legal move at the same ply, signed
 
     if k%1000==0 then
       print(k);
