@@ -21,8 +21,7 @@ function readNumb(s,from,to)
     i=i+1;
 	b=b*256;
   end
-  -- last bit is sign for signed and will never be 1 for unsigned int
-  if string.byte(s,to)>127 then
+  if string.byte(s,to)==255 then
     r=r-b;
   end
   return r;
@@ -150,6 +149,6 @@ binBase = {};
 variants = {};
 
 -- scan .abk file
-readAbkFile("abk_sample.abk");
+readAbkFile("book_tiny.abk");
 
 
